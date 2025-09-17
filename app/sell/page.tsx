@@ -314,7 +314,11 @@ export default function SellPage() {
                       수종을 선택하세요
                     </option>
                     {speciesOptions.map((option) => (
-                      <option key={option} value={option} className="text-black">
+                      <option
+                        key={option}
+                        value={option}
+                        className="text-black"
+                      >
                         {option}
                       </option>
                     ))}
@@ -335,7 +339,11 @@ export default function SellPage() {
                       수형을 선택하세요
                     </option>
                     {styleOptions.map((option) => (
-                      <option key={option} value={option} className="text-black">
+                      <option
+                        key={option}
+                        value={option}
+                        className="text-black"
+                      >
                         {option}
                       </option>
                     ))}
