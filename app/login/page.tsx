@@ -59,8 +59,8 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">로그인</h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <h2 className="text-3xl font-bold text-black">로그인</h2>
+          <p className="mt-2 text-sm text-black">
             분재경매에 오신 것을 환영합니다
           </p>
         </div>
@@ -81,7 +81,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-black"
               >
                 이메일 주소
               </label>
@@ -106,7 +106,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-black"
               >
                 비밀번호
               </label>
@@ -131,9 +131,9 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-500" />
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-black" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-500" />
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-black" />
                   )}
                 </button>
               </div>
@@ -149,7 +149,7 @@ export default function LoginPage() {
                 />
                 <label
                   htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-900"
+                  className="ml-2 block text-sm text-black"
                 >
                   로그인 상태 유지
                 </label>
@@ -182,7 +182,7 @@ export default function LoginPage() {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">또는</span>
+                <span className="px-2 bg-white text-black">또는</span>
               </div>
             </div>
 
@@ -190,7 +190,7 @@ export default function LoginPage() {
               <Button
                 type="button"
                 variant="outline"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-black hover:bg-gray-50"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
@@ -216,7 +216,7 @@ export default function LoginPage() {
               <Button
                 type="button"
                 variant="outline"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-black hover:bg-gray-50"
               >
                 <svg
                   className="w-5 h-5"
@@ -231,7 +231,7 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-black">
               아직 계정이 없으신가요?{" "}
               <Link
                 href="/signup"

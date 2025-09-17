@@ -188,10 +188,10 @@ export default function SellPage() {
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center">
             <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-black mb-2">
               상품 등록 완료!
             </h2>
-            <p className="text-gray-600 mb-4">
+            <p className="text-black mb-4">
               상품이 성공적으로 등록되었습니다.
               <br />
               관리자 검수 후 경매가 시작됩니다.
@@ -210,12 +210,8 @@ export default function SellPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            분재 판매하기
-          </h1>
-          <p className="text-gray-600">
-            귀하의 소중한 분재를 경매에 등록하세요
-          </p>
+          <h1 className="text-3xl font-bold text-black mb-2">분재 판매하기</h1>
+          <p className="text-black">귀하의 소중한 분재를 경매에 등록하세요</p>
         </div>
 
         {/* Progress Steps */}
@@ -239,7 +235,7 @@ export default function SellPage() {
                 </div>
                 <span
                   className={`ml-2 text-sm font-medium ${
-                    currentStep >= step ? "text-green-600" : "text-gray-500"
+                    currentStep >= step ? "text-green-600" : "text-black"
                   }`}
                 >
                   {title}
@@ -272,7 +268,7 @@ export default function SellPage() {
               <h2 className="text-xl font-semibold mb-4">기본 정보</h2>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   상품명 *
                 </label>
                 <input
@@ -287,7 +283,7 @@ export default function SellPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   상품 설명
                 </label>
                 <textarea
@@ -302,7 +298,7 @@ export default function SellPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-black mb-2">
                     수종 *
                   </label>
                   <select
@@ -322,7 +318,7 @@ export default function SellPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-black mb-2">
                     수형
                   </label>
                   <select
@@ -343,7 +339,7 @@ export default function SellPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-black mb-2">
                     높이 (cm)
                   </label>
                   <input
@@ -357,7 +353,7 @@ export default function SellPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-black mb-2">
                     수관폭 (cm)
                   </label>
                   <input
@@ -371,7 +367,7 @@ export default function SellPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-black mb-2">
                     간경 (cm)
                   </label>
                   <input
@@ -386,7 +382,7 @@ export default function SellPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   추정 수령 (년)
                 </label>
                 <input
@@ -400,7 +396,7 @@ export default function SellPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   건강 상태
                 </label>
                 <textarea
@@ -414,7 +410,7 @@ export default function SellPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   관리 이력
                 </label>
                 <textarea
@@ -436,7 +432,7 @@ export default function SellPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-black mb-2">
                     시작가 (원) *
                   </label>
                   <input
@@ -451,7 +447,7 @@ export default function SellPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-black mb-2">
                     입찰 단위 (원) *
                   </label>
                   <input
@@ -468,7 +464,7 @@ export default function SellPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-black mb-2">
                     즉시구매가 (원)
                   </label>
                   <input
@@ -482,7 +478,7 @@ export default function SellPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-black mb-2">
                     최저 낙찰가 (원)
                   </label>
                   <input
@@ -498,7 +494,7 @@ export default function SellPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-black mb-2">
                     경매 시작일시 *
                   </label>
                   <input
@@ -512,7 +508,7 @@ export default function SellPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-black mb-2">
                     경매 종료일시 *
                   </label>
                   <input
@@ -527,7 +523,7 @@ export default function SellPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   자동연장 시간 (분)
                 </label>
                 <input
@@ -538,7 +534,7 @@ export default function SellPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   placeholder="5"
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-black mt-1">
                   마지막 입찰 후 자동으로 연장될 시간을 설정하세요
                 </p>
               </div>
@@ -561,10 +557,10 @@ export default function SellPage() {
                 />
                 <label htmlFor="media-upload" className="cursor-pointer">
                   <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-lg font-medium text-gray-900 mb-2">
+                  <p className="text-lg font-medium text-black mb-2">
                     사진과 동영상을 업로드하세요
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-black">
                     최대 10개 파일, 각 파일당 10MB 이하
                   </p>
                 </label>
@@ -616,7 +612,7 @@ export default function SellPage() {
               <h2 className="text-xl font-semibold mb-4">배송 정보</h2>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   배송 방법 *
                 </label>
                 <select
@@ -635,7 +631,7 @@ export default function SellPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   배송비 정책
                 </label>
                 <textarea
@@ -649,7 +645,7 @@ export default function SellPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   포장 주의사항
                 </label>
                 <textarea

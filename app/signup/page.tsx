@@ -109,10 +109,10 @@ export default function SignupPage() {
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center">
             <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-black mb-2">
               회원가입 완료!
             </h2>
-            <p className="text-gray-600 mb-4">
+            <p className="text-black mb-4">
               회원가입이 성공적으로 완료되었습니다.
               <br />
               로그인 페이지로 이동합니다...
@@ -130,8 +130,8 @@ export default function SignupPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">회원가입</h2>
-          <p className="mt-2 text-sm text-gray-600">분재경매에 함께하세요</p>
+          <h2 className="text-3xl font-bold text-black">회원가입</h2>
+          <p className="mt-2 text-sm text-black">분재경매에 함께하세요</p>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ export default function SignupPage() {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-black"
                 >
                   이메일 주소 *
                 </label>
@@ -185,7 +185,7 @@ export default function SignupPage() {
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-black"
                 >
                   이름 *
                 </label>
@@ -210,7 +210,7 @@ export default function SignupPage() {
               <div>
                 <label
                   htmlFor="nickname"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-black"
                 >
                   닉네임 *
                 </label>
@@ -235,7 +235,7 @@ export default function SignupPage() {
               <div>
                 <label
                   htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-black"
                 >
                   전화번호
                 </label>
@@ -259,7 +259,7 @@ export default function SignupPage() {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-black"
                 >
                   비밀번호 *
                 </label>
@@ -288,9 +288,9 @@ export default function SignupPage() {
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-500" />
+                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-black" />
                     ) : (
-                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-500" />
+                      <Eye className="h-5 w-5 text-gray-400 hover:text-black" />
                     )}
                   </button>
                 </div>
@@ -304,7 +304,7 @@ export default function SignupPage() {
               <div>
                 <label
                   htmlFor="confirmPassword"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-black"
                 >
                   비밀번호 확인 *
                 </label>
@@ -334,9 +334,9 @@ export default function SignupPage() {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
                     {showConfirmPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-500" />
+                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-black" />
                     ) : (
-                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-500" />
+                      <Eye className="h-5 w-5 text-gray-400 hover:text-black" />
                     )}
                   </button>
                 </div>
@@ -362,7 +362,7 @@ export default function SignupPage() {
                 />
                 <label
                   htmlFor="terms"
-                  className="ml-2 block text-sm text-gray-900"
+                  className="ml-2 block text-sm text-black"
                 >
                   <span className="text-red-500">*</span> 이용약관에 동의합니다.{" "}
                   <Link
@@ -385,7 +385,7 @@ export default function SignupPage() {
                 />
                 <label
                   htmlFor="privacy"
-                  className="ml-2 block text-sm text-gray-900"
+                  className="ml-2 block text-sm text-black"
                 >
                   <span className="text-red-500">*</span> 개인정보처리방침에
                   동의합니다.{" "}
@@ -407,7 +407,7 @@ export default function SignupPage() {
                 />
                 <label
                   htmlFor="marketing"
-                  className="ml-2 block text-sm text-gray-900"
+                  className="ml-2 block text-sm text-black"
                 >
                   마케팅 정보 수신에 동의합니다 (선택)
                 </label>
@@ -431,7 +431,7 @@ export default function SignupPage() {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">또는</span>
+                <span className="px-2 bg-white text-black">또는</span>
               </div>
             </div>
 
@@ -439,7 +439,7 @@ export default function SignupPage() {
               <Button
                 type="button"
                 variant="outline"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-black hover:bg-gray-50"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
@@ -465,7 +465,7 @@ export default function SignupPage() {
               <Button
                 type="button"
                 variant="outline"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-black hover:bg-gray-50"
               >
                 <svg
                   className="w-5 h-5"
@@ -480,7 +480,7 @@ export default function SignupPage() {
           </div>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-black">
               이미 계정이 있으신가요?{" "}
               <Link
                 href="/login"

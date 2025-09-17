@@ -186,7 +186,7 @@ export default function ItemDetailPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">상품 정보를 불러오는 중...</p>
+          <p className="text-black">상품 정보를 불러오는 중...</p>
         </div>
       </div>
     );
@@ -196,10 +196,10 @@ export default function ItemDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl font-bold text-black mb-2">
             상품을 찾을 수 없습니다
           </h1>
-          <p className="text-gray-600 mb-4">
+          <p className="text-black mb-4">
             요청하신 상품이 존재하지 않거나 삭제되었습니다.
           </p>
           <Button asChild>
@@ -265,10 +265,10 @@ export default function ItemDetailPage() {
           <div className="space-y-6">
             {/* Title and Basic Info */}
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-black mb-2">
                 {item.title}
               </h1>
-              <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+              <div className="flex items-center space-x-4 text-sm text-black mb-4">
                 <span>조회수 {item.viewCount}</span>
                 <span>•</span>
                 <span>입찰 {item._count.bids}회</span>
@@ -281,9 +281,7 @@ export default function ItemDetailPage() {
             <div className="bg-white rounded-lg p-6 border">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-medium text-gray-700">
-                    현재가
-                  </span>
+                  <span className="text-lg font-medium text-black">현재가</span>
                   <span className="text-3xl font-bold text-green-600">
                     {formatPrice(item.currentPrice)}원
                   </span>
@@ -291,7 +289,7 @@ export default function ItemDetailPage() {
 
                 {item.buyNowPrice && (
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-medium text-gray-700">
+                    <span className="text-lg font-medium text-black">
                       즉시구매가
                     </span>
                     <span className="text-2xl font-bold text-blue-600">
@@ -300,12 +298,12 @@ export default function ItemDetailPage() {
                   </div>
                 )}
 
-                <div className="flex items-center justify-between text-sm text-gray-500">
+                <div className="flex items-center justify-between text-sm text-black">
                   <span>시작가</span>
                   <span>{formatPrice(item.startPrice)}원</span>
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-gray-500">
+                <div className="flex items-center justify-between text-sm text-black">
                   <span>입찰 단위</span>
                   <span>{formatPrice(item.bidStep)}원</span>
                 </div>
@@ -345,7 +343,7 @@ export default function ItemDetailPage() {
                 </>
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-gray-500 mb-2">이 경매는 종료되었습니다</p>
+                  <p className="text-black mb-2">이 경매는 종료되었습니다</p>
                   <Button variant="outline" asChild>
                     <Link href="/auctions">다른 경매 보기</Link>
                   </Button>
@@ -389,7 +387,7 @@ export default function ItemDetailPage() {
                       className="rounded-full"
                     />
                   ) : (
-                    <span className="text-gray-500 font-medium">
+                    <span className="text-black font-medium">
                       {item.seller.nickname?.[0] || "?"}
                     </span>
                   )}
@@ -398,7 +396,7 @@ export default function ItemDetailPage() {
                   <p className="font-medium">
                     {item.seller.nickname || item.seller.name || "익명"}
                   </p>
-                  <div className="flex items-center text-sm text-gray-500">
+                  <div className="flex items-center text-sm text-black">
                     <Star className="h-4 w-4 mr-1" />
                     <span>평점 4.8 (24)</span>
                   </div>
@@ -416,42 +414,42 @@ export default function ItemDetailPage() {
               <h3 className="text-xl font-semibold mb-4">상품 상세 정보</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <span className="text-gray-600">수종</span>
+                  <span className="text-black">수종</span>
                   <p className="font-medium">{item.species}</p>
                 </div>
                 {item.style && (
                   <div>
-                    <span className="text-gray-600">수형</span>
+                    <span className="text-black">수형</span>
                     <p className="font-medium">{item.style}</p>
                   </div>
                 )}
                 {item.sizeClass && (
                   <div>
-                    <span className="text-gray-600">크기 분류</span>
+                    <span className="text-black">크기 분류</span>
                     <p className="font-medium">{item.sizeClass}</p>
                   </div>
                 )}
                 {item.heightCm && (
                   <div>
-                    <span className="text-gray-600">높이</span>
+                    <span className="text-black">높이</span>
                     <p className="font-medium">{item.heightCm}cm</p>
                   </div>
                 )}
                 {item.crownWidthCm && (
                   <div>
-                    <span className="text-gray-600">수관폭</span>
+                    <span className="text-black">수관폭</span>
                     <p className="font-medium">{item.crownWidthCm}cm</p>
                   </div>
                 )}
                 {item.trunkDiameterCm && (
                   <div>
-                    <span className="text-gray-600">간경</span>
+                    <span className="text-black">간경</span>
                     <p className="font-medium">{item.trunkDiameterCm}cm</p>
                   </div>
                 )}
                 {item.ageYearsEst && (
                   <div>
-                    <span className="text-gray-600">추정 수령</span>
+                    <span className="text-black">추정 수령</span>
                     <p className="font-medium">{item.ageYearsEst}년</p>
                   </div>
                 )}
@@ -461,7 +459,7 @@ export default function ItemDetailPage() {
             {item.description && (
               <div className="bg-white rounded-lg p-6">
                 <h3 className="text-xl font-semibold mb-4">상품 설명</h3>
-                <p className="text-gray-700 whitespace-pre-wrap">
+                <p className="text-black whitespace-pre-wrap">
                   {item.description}
                 </p>
               </div>
@@ -470,7 +468,7 @@ export default function ItemDetailPage() {
             {item.healthNotes && (
               <div className="bg-white rounded-lg p-6">
                 <h3 className="text-xl font-semibold mb-4">건강 상태</h3>
-                <p className="text-gray-700 whitespace-pre-wrap">
+                <p className="text-black whitespace-pre-wrap">
                   {item.healthNotes}
                 </p>
               </div>
@@ -479,7 +477,7 @@ export default function ItemDetailPage() {
             {item.careHistory && (
               <div className="bg-white rounded-lg p-6">
                 <h3 className="text-xl font-semibold mb-4">관리 이력</h3>
-                <p className="text-gray-700 whitespace-pre-wrap">
+                <p className="text-black whitespace-pre-wrap">
                   {item.careHistory}
                 </p>
               </div>
@@ -498,17 +496,17 @@ export default function ItemDetailPage() {
                   >
                     <div>
                       <p className="font-medium">{formatPrice(bid.amount)}원</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-black">
                         {bid.bidder.nickname || "익명"}
                       </p>
                     </div>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-black">
                       {new Date(bid.createdAt).toLocaleString()}
                     </p>
                   </div>
                 ))}
                 {item.bids.length === 0 && (
-                  <p className="text-gray-500 text-center py-4">
+                  <p className="text-black text-center py-4">
                     아직 입찰이 없습니다
                   </p>
                 )}
@@ -530,7 +528,7 @@ export default function ItemDetailPage() {
                   </div>
                 )}
                 {item.packagingNotes && (
-                  <p className="text-sm text-gray-600 mt-2">
+                  <p className="text-sm text-black mt-2">
                     {item.packagingNotes}
                   </p>
                 )}
@@ -547,7 +545,7 @@ export default function ItemDetailPage() {
             <h3 className="text-xl font-semibold mb-4">입찰하기</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   입찰 금액 (원)
                 </label>
                 <input
@@ -559,7 +557,7 @@ export default function ItemDetailPage() {
                   )}원`}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-black mt-1">
                   최소 입찰가: {formatPrice(item.currentPrice + item.bidStep)}원
                 </p>
               </div>

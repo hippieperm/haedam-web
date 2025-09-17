@@ -189,7 +189,7 @@ export default function CartPage() {
         return {
           icon: <Clock className="h-4 w-4" />,
           text: "알 수 없음",
-          color: "text-gray-600",
+          color: "text-black",
           bgColor: "bg-gray-50",
         };
     }
@@ -200,7 +200,7 @@ export default function CartPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">장바구니를 불러오는 중...</p>
+          <p className="text-black">장바구니를 불러오는 중...</p>
         </div>
       </div>
     );
@@ -211,10 +211,10 @@ export default function CartPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl font-bold text-black mb-2">
             오류가 발생했습니다
           </h1>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-black mb-4">{error}</p>
           <Button onClick={fetchCartItems}>다시 시도</Button>
         </div>
       </div>
@@ -228,12 +228,8 @@ export default function CartPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                장바구니
-              </h1>
-              <p className="text-gray-600">
-                선택한 상품들을 확인하고 구매하세요
-              </p>
+              <h1 className="text-3xl font-bold text-black mb-2">장바구니</h1>
+              <p className="text-black">선택한 상품들을 확인하고 구매하세요</p>
             </div>
             {items.length > 0 && (
               <Button
@@ -253,10 +249,10 @@ export default function CartPage() {
             <div className="text-gray-400 mb-4">
               <ShoppingCart className="h-12 w-12 mx-auto" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-black mb-2">
               장바구니가 비어있습니다
             </h3>
-            <p className="text-gray-500 mb-4">
+            <p className="text-black mb-4">
               관심있는 분재를 장바구니에 추가해보세요
             </p>
             <div className="flex justify-center space-x-4">
@@ -290,12 +286,12 @@ export default function CartPage() {
                         }
                         className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                       />
-                      <span className="ml-2 text-sm font-medium text-gray-700">
+                      <span className="ml-2 text-sm font-medium text-black">
                         전체 선택 ({selectedItems.size}/{items.length})
                       </span>
                     </label>
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-black">
                     총 {items.length}개 상품
                   </div>
                 </div>
@@ -336,17 +332,17 @@ export default function CartPage() {
                                   <span className="ml-1">{typeInfo.text}</span>
                                 </div>
                                 {!isLive && (
-                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-black">
                                     종료됨
                                   </span>
                                 )}
                               </div>
 
-                              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                              <h3 className="text-lg font-semibold text-black mb-1">
                                 {cartItem.item.title}
                               </h3>
 
-                              <p className="text-sm text-gray-500 mb-2">
+                              <p className="text-sm text-black mb-2">
                                 {cartItem.item.species} •{" "}
                                 {cartItem.item.seller.nickname || "익명"}
                               </p>
@@ -365,7 +361,7 @@ export default function CartPage() {
                             </div>
 
                             <div className="flex items-center space-x-2">
-                              <div className="text-right text-sm text-gray-500">
+                              <div className="text-right text-sm text-black">
                                 <div>
                                   추가일:{" "}
                                   {new Date(
@@ -434,7 +430,7 @@ export default function CartPage() {
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                <h3 className="text-lg font-semibold text-black mb-4">
                   주문 요약
                 </h3>
 

@@ -99,10 +99,8 @@ export default function BuyNowPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">즉시구매</h1>
-          <p className="text-gray-600">
-            즉시구매가 설정된 분재를 바로 구매하세요
-          </p>
+          <h1 className="text-3xl font-bold text-black mb-2">즉시구매</h1>
+          <p className="text-black">즉시구매가 설정된 분재를 바로 구매하세요</p>
         </div>
 
         {/* Features */}
@@ -131,7 +129,7 @@ export default function BuyNowPage() {
             {/* Search and Species */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   검색어
                 </label>
                 <div className="relative">
@@ -146,7 +144,7 @@ export default function BuyNowPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   수종
                 </label>
                 <select
@@ -167,7 +165,7 @@ export default function BuyNowPage() {
             {/* Price Range */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   최소 가격 (원)
                 </label>
                 <input
@@ -179,7 +177,7 @@ export default function BuyNowPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   최대 가격 (원)
                 </label>
                 <input
@@ -204,7 +202,7 @@ export default function BuyNowPage() {
         {/* Sort Options */}
         <div className="flex flex-wrap items-center justify-between mb-6">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
-            <span className="text-sm font-medium text-gray-700">정렬:</span>
+            <span className="text-sm font-medium text-black">정렬:</span>
             <div className="flex space-x-2">
               <Button
                 variant={sortBy === "newest" ? "default" : "outline"}
@@ -231,9 +229,7 @@ export default function BuyNowPage() {
               </Button>
             </div>
           </div>
-          <div className="text-sm text-gray-500">
-            총 {items.length}개의 상품
-          </div>
+          <div className="text-sm text-black">총 {items.length}개의 상품</div>
         </div>
 
         {/* Items Grid */}
@@ -264,10 +260,10 @@ export default function BuyNowPage() {
             <div className="text-gray-400 mb-4">
               <ShoppingCart className="h-12 w-12 mx-auto" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-black mb-2">
               즉시구매 가능한 상품이 없습니다
             </h3>
-            <p className="text-gray-500 mb-4">
+            <p className="text-black mb-4">
               다른 검색 조건을 시도하거나 경매 상품을 확인해보세요
             </p>
             <div className="flex justify-center space-x-4">

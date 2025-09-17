@@ -103,11 +103,11 @@ export default function WishlistPage() {
     const isEnded = endsAt < now;
 
     if (!isLive) {
-      return { status: "ended", text: "종료됨", color: "text-gray-500" };
+      return { status: "ended", text: "종료됨", color: "text-black" };
     }
 
     if (isEnded) {
-      return { status: "ended", text: "종료됨", color: "text-gray-500" };
+      return { status: "ended", text: "종료됨", color: "text-black" };
     }
 
     const timeLeft = endsAt.getTime() - now.getTime();
@@ -142,7 +142,7 @@ export default function WishlistPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">관심목록을 불러오는 중...</p>
+          <p className="text-black">관심목록을 불러오는 중...</p>
         </div>
       </div>
     );
@@ -153,10 +153,10 @@ export default function WishlistPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl font-bold text-black mb-2">
             오류가 발생했습니다
           </h1>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-black mb-4">{error}</p>
           <Button onClick={fetchWatchlist}>다시 시도</Button>
         </div>
       </div>
@@ -170,10 +170,8 @@ export default function WishlistPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                관심목록
-              </h1>
-              <p className="text-gray-600">
+              <h1 className="text-3xl font-bold text-black mb-2">관심목록</h1>
+              <p className="text-black">
                 관심있는 분재 경매를 한눈에 확인하세요
               </p>
             </div>
@@ -198,13 +196,13 @@ export default function WishlistPage() {
                 <div className="text-2xl font-bold text-green-600">
                   {items.length}
                 </div>
-                <div className="text-sm text-gray-500">총 관심상품</div>
+                <div className="text-sm text-black">총 관심상품</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">
                   {items.filter((item) => item.item.status === "LIVE").length}
                 </div>
-                <div className="text-sm text-gray-500">진행중인 경매</div>
+                <div className="text-sm text-black">진행중인 경매</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-orange-600">
@@ -218,7 +216,7 @@ export default function WishlistPage() {
                     }).length
                   }
                 </div>
-                <div className="text-sm text-gray-500">오늘 마감</div>
+                <div className="text-sm text-black">오늘 마감</div>
               </div>
             </div>
           </div>
@@ -230,10 +228,10 @@ export default function WishlistPage() {
             <div className="text-gray-400 mb-4">
               <Heart className="h-12 w-12 mx-auto" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-black mb-2">
               관심목록이 비어있습니다
             </h3>
-            <p className="text-gray-500 mb-4">
+            <p className="text-black mb-4">
               마음에 드는 분재를 관심목록에 추가해보세요
             </p>
             <Button asChild>
@@ -245,7 +243,7 @@ export default function WishlistPage() {
             {/* Live Auctions */}
             {items.filter((item) => item.item.status === "LIVE").length > 0 && (
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <h2 className="text-xl font-semibold text-black mb-4 flex items-center">
                   <Gavel className="h-5 w-5 mr-2 text-green-600" />
                   진행중인 경매
                 </h2>
@@ -283,8 +281,8 @@ export default function WishlistPage() {
             {/* Ended Auctions */}
             {items.filter((item) => item.item.status !== "LIVE").length > 0 && (
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                  <Clock className="h-5 w-5 mr-2 text-gray-500" />
+                <h2 className="text-xl font-semibold text-black mb-4 flex items-center">
+                  <Clock className="h-5 w-5 mr-2 text-black" />
                   종료된 경매
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -296,7 +294,7 @@ export default function WishlistPage() {
                           <ItemCard item={watchlistItem.item} />
                         </div>
                         <div className="absolute top-2 right-2 flex space-x-1">
-                          <div className="px-2 py-1 rounded-full text-xs font-medium bg-white text-gray-500">
+                          <div className="px-2 py-1 rounded-full text-xs font-medium bg-white text-black">
                             종료됨
                           </div>
                           <button
@@ -320,9 +318,7 @@ export default function WishlistPage() {
         {/* Quick Actions */}
         {items.length > 0 && (
           <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              빠른 액션
-            </h3>
+            <h3 className="text-lg font-semibold text-black mb-4">빠른 액션</h3>
             <div className="flex flex-wrap gap-4">
               <Button asChild variant="outline">
                 <Link href="/auctions">

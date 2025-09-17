@@ -139,7 +139,7 @@ export default function AdminItemsPage() {
       case "ENDED":
         return {
           text: "종료됨",
-          color: "text-gray-600",
+          color: "text-black",
           bgColor: "bg-gray-100",
           icon: <Package className="h-4 w-4" />,
         };
@@ -153,7 +153,7 @@ export default function AdminItemsPage() {
       default:
         return {
           text: status,
-          color: "text-gray-600",
+          color: "text-black",
           bgColor: "bg-gray-100",
           icon: <AlertTriangle className="h-4 w-4" />,
         };
@@ -173,10 +173,8 @@ export default function AdminItemsPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                상품 관리
-              </h1>
-              <p className="text-gray-600">등록된 상품을 검수하고 관리하세요</p>
+              <h1 className="text-3xl font-bold text-black mb-2">상품 관리</h1>
+              <p className="text-black">등록된 상품을 검수하고 관리하세요</p>
             </div>
             <Button asChild>
               <Link href="/admin">대시보드로 돌아가기</Link>
@@ -189,7 +187,7 @@ export default function AdminItemsPage() {
           <form onSubmit={handleSearch} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   검색어
                 </label>
                 <div className="relative">
@@ -205,7 +203,7 @@ export default function AdminItemsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   상태
                 </label>
                 <select
@@ -235,32 +233,32 @@ export default function AdminItemsPage() {
           {loading ? (
             <div className="p-8 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">상품을 불러오는 중...</p>
+              <p className="text-black">상품을 불러오는 중...</p>
             </div>
           ) : items.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       상품 정보
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       판매자
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       가격
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       상태
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       통계
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       등록일
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       액션
                     </th>
                   </tr>
@@ -285,10 +283,10 @@ export default function AdminItemsPage() {
                               />
                             </div>
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-black">
                                 {item.title}
                               </div>
-                              <div className="text-sm text-gray-500">
+                              <div className="text-sm text-black">
                                 {item.species}
                               </div>
                             </div>
@@ -298,19 +296,19 @@ export default function AdminItemsPage() {
                           <div className="flex items-center">
                             <User className="h-4 w-4 text-gray-400 mr-2" />
                             <div>
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-black">
                                 {item.seller.nickname ||
                                   item.seller.name ||
                                   "익명"}
                               </div>
-                              <div className="text-sm text-gray-500">
+                              <div className="text-sm text-black">
                                 ID: {item.seller.id.slice(0, 8)}...
                               </div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
+                          <div className="text-sm text-black">
                             {item.currentPrice.toLocaleString()}원
                           </div>
                           {item.buyNowPrice && (
@@ -327,11 +325,11 @@ export default function AdminItemsPage() {
                             <span className="ml-1">{statusInfo.text}</span>
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
                           <div>입찰: {item._count.bids}</div>
                           <div>관심: {item._count.watchlists}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
                           {new Date(item.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -375,12 +373,10 @@ export default function AdminItemsPage() {
           ) : (
             <div className="p-8 text-center">
               <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="text-lg font-medium text-black mb-2">
                 상품이 없습니다
               </h3>
-              <p className="text-gray-500">
-                선택한 조건에 맞는 상품이 없습니다.
-              </p>
+              <p className="text-black">선택한 조건에 맞는 상품이 없습니다.</p>
             </div>
           )}
         </div>

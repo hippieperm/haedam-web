@@ -1,12 +1,12 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Search, Menu, X, User, ShoppingCart, Heart } from 'lucide-react'
+import Link from "next/link";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Search, Menu, X, User, ShoppingCart, Heart } from "lucide-react";
 
 export function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <header className="bg-white shadow-sm border-b">
@@ -33,29 +33,29 @@ export function Header() {
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/auctions" className="text-gray-700 hover:text-green-600">
+            <Link href="/auctions" className="text-black hover:text-green-600">
               경매
             </Link>
-            <Link href="/buy-now" className="text-gray-700 hover:text-green-600">
+            <Link href="/buy-now" className="text-black hover:text-green-600">
               즉시구매
             </Link>
-            <Link href="/sell" className="text-gray-700 hover:text-green-600">
+            <Link href="/sell" className="text-black hover:text-green-600">
               판매하기
             </Link>
-            <Link href="/wishlist" className="text-gray-700 hover:text-green-600">
+            <Link href="/wishlist" className="text-black hover:text-green-600">
               <Heart className="h-5 w-5" />
             </Link>
-            <Link href="/cart" className="text-gray-700 hover:text-green-600">
+            <Link href="/cart" className="text-black hover:text-green-600">
               <ShoppingCart className="h-5 w-5" />
             </Link>
           </nav>
 
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" asChild className="text-black">
               <Link href="/login">로그인</Link>
             </Button>
-            <Button asChild>
+            <Button asChild className="text-black">
               <Link href="/signup">회원가입</Link>
             </Button>
           </div>
@@ -67,7 +67,11 @@ export function Header() {
               size="icon"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </Button>
           </div>
         </div>
@@ -88,33 +92,37 @@ export function Header() {
               </div>
               <Link
                 href="/auctions"
-                className="block px-3 py-2 text-gray-700 hover:text-green-600"
+                className="block px-3 py-2 text-black hover:text-green-600"
                 onClick={() => setIsMenuOpen(false)}
               >
                 경매
               </Link>
               <Link
                 href="/buy-now"
-                className="block px-3 py-2 text-gray-700 hover:text-green-600"
+                className="block px-3 py-2 text-black hover:text-green-600"
                 onClick={() => setIsMenuOpen(false)}
               >
                 즉시구매
               </Link>
               <Link
                 href="/sell"
-                className="block px-3 py-2 text-gray-700 hover:text-green-600"
+                className="block px-3 py-2 text-black hover:text-green-600"
                 onClick={() => setIsMenuOpen(false)}
               >
                 판매하기
               </Link>
               <div className="pt-4 border-t border-gray-200">
                 <div className="space-y-2">
-                  <Button variant="ghost" className="w-full justify-start" asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-black"
+                    asChild
+                  >
                     <Link href="/login" onClick={() => setIsMenuOpen(false)}>
                       로그인
                     </Link>
                   </Button>
-                  <Button className="w-full" asChild>
+                  <Button className="w-full text-black" asChild>
                     <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
                       회원가입
                     </Link>
@@ -126,5 +134,5 @@ export function Header() {
         )}
       </div>
     </header>
-  )
+  );
 }

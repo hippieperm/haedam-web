@@ -1,34 +1,35 @@
-import Link from 'next/link'
-import Image from 'next/image'
-import { Heart, Eye, Clock } from 'lucide-react'
-import { formatPrice, formatTimeRemaining } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import Link from "next/link";
+import Image from "next/image";
+import { Heart, Eye, Clock } from "lucide-react";
+import { formatPrice, formatTimeRemaining } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface ItemCardProps {
   item: {
-    id: string
-    title: string
-    species: string
-    currentPrice: number
-    buyNowPrice?: number | null
-    endsAt: string
-    status: string
-    coverImageUrl?: string | null
-    media?: { url: string }[]
+    id: string;
+    title: string;
+    species: string;
+    currentPrice: number;
+    buyNowPrice?: number | null;
+    endsAt: string;
+    status: string;
+    coverImageUrl?: string | null;
+    media?: { url: string }[];
     _count: {
-      bids: number
-      watchlists: number
-    }
+      bids: number;
+      watchlists: number;
+    };
     seller: {
-      nickname: string | null
-    }
-  }
+      nickname: string | null;
+    };
+  };
 }
 
 export function ItemCard({ item }: ItemCardProps) {
-  const imageUrl = item.coverImageUrl || item.media?.[0]?.url || '/placeholder-bonsai.jpg'
-  const isLive = item.status === 'LIVE'
-  const timeRemaining = isLive ? formatTimeRemaining(item.endsAt) : null
+  const imageUrl =
+    item.coverImageUrl || item.media?.[0]?.url || "/placeholder-bonsai.jpg";
+  const isLive = item.status === "LIVE";
+  const timeRemaining = isLive ? formatTimeRemaining(item.endsAt) : null;
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
@@ -41,7 +42,7 @@ export function ItemCard({ item }: ItemCardProps) {
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           />
-          {item.status === 'LIVE' && (
+          {item.status === "LIVE" && (
             <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-medium">
               경매중
             </div>
@@ -61,11 +62,11 @@ export function ItemCard({ item }: ItemCardProps) {
           </h3>
         </Link>
 
-        <div className="text-sm text-gray-500 mb-2">
+        <div className="text-sm text-black mb-2">
           <span>{item.species}</span>
           {item.seller.nickname && (
             <>
-              {' · '}
+              {" · "}
               <span>{item.seller.nickname}</span>
             </>
           )}
@@ -76,7 +77,7 @@ export function ItemCard({ item }: ItemCardProps) {
             {formatPrice(item.currentPrice)}원
           </div>
           {item.buyNowPrice && (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-black">
               즉시구매: {formatPrice(item.buyNowPrice)}원
             </div>
           )}
@@ -89,7 +90,7 @@ export function ItemCard({ item }: ItemCardProps) {
           </div>
         )}
 
-        <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+        <div className="flex items-center justify-between text-sm text-black mb-3">
           <div className="flex items-center space-x-3">
             <span>입찰 {item._count.bids}</span>
             <div className="flex items-center">
@@ -102,27 +103,21 @@ export function ItemCard({ item }: ItemCardProps) {
         <div className="flex space-x-2">
           {isLive && (
             <Button asChild className="flex-1">
-              <Link href={`/items/${item.id}`}>
-                입찰하기
-              </Link>
+              <Link href={`/items/${item.id}`}>입찰하기</Link>
             </Button>
           )}
           {item.buyNowPrice && isLive && (
             <Button variant="outline" asChild className="flex-1">
-              <Link href={`/items/${item.id}/buy-now`}>
-                즉시구매
-              </Link>
+              <Link href={`/items/${item.id}/buy-now`}>즉시구매</Link>
             </Button>
           )}
           {!isLive && (
             <Button variant="outline" asChild className="flex-1">
-              <Link href={`/items/${item.id}`}>
-                상세보기
-              </Link>
+              <Link href={`/items/${item.id}`}>상세보기</Link>
             </Button>
           )}
         </div>
       </div>
     </div>
-  )
+  );
 }

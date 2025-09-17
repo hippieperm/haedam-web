@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from "next/link";
 
 export function Footer() {
   return (
@@ -10,10 +10,8 @@ export function Footer() {
             <div className="text-2xl font-bold text-green-400 mb-4">
               분재경매
             </div>
-            <p className="text-gray-400 mb-4">
-              전국 최대 규모의 분재 경매 플랫폼
-            </p>
-            <div className="text-sm text-gray-400">
+            <p className="text-black mb-4">전국 최대 규모의 분재 경매 플랫폼</p>
+            <div className="text-sm text-black">
               <p>대표: 환기님</p>
               <p>사업자등록번호: 123-45-67890</p>
               <p>통신판매업신고: 제2024-서울강남-00000호</p>
@@ -23,7 +21,7 @@ export function Footer() {
           {/* Services */}
           <div>
             <h3 className="text-lg font-semibold mb-4">서비스</h3>
-            <ul className="space-y-2 text-gray-400">
+            <ul className="space-y-2 text-black">
               <li>
                 <Link href="/auctions" className="hover:text-white">
                   경매
@@ -50,7 +48,7 @@ export function Footer() {
           {/* Support */}
           <div>
             <h3 className="text-lg font-semibold mb-4">고객지원</h3>
-            <ul className="space-y-2 text-gray-400">
+            <ul className="space-y-2 text-black">
               <li>
                 <Link href="/faq" className="hover:text-white">
                   자주묻는질문
@@ -75,7 +73,7 @@ export function Footer() {
           {/* Legal */}
           <div>
             <h3 className="text-lg font-semibold mb-4">약관 및 정책</h3>
-            <ul className="space-y-2 text-gray-400">
+            <ul className="space-y-2 text-black">
               <li>
                 <Link href="/terms" className="hover:text-white">
                   이용약관
@@ -100,10 +98,10 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-black">
           <p>&copy; 2024 분재경매. All rights reserved.</p>
         </div>
       </div>
     </footer>
-  )
+  );
 }
