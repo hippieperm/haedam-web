@@ -726,7 +726,7 @@ export default function SellPage() {
               variant="outline"
               onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
               disabled={currentStep === 1}
-              className="border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold px-6 py-2"
+              className="border-2 border-blue-300 text-blue-600 bg-blue-50 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-100 font-semibold px-6 py-2 disabled:border-gray-200 disabled:text-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed"
             >
               이전
             </Button>
