@@ -57,12 +57,12 @@ export function ItemCard({ item }: ItemCardProps) {
 
       <div className="p-4">
         <Link href={`/items/${item.id}`}>
-          <h3 className="font-semibold text-lg mb-2 line-clamp-2 hover:text-green-600">
+          <h3 className="font-bold text-xl text-black mb-2 line-clamp-2 hover:text-green-600 transition-colors">
             {item.title}
           </h3>
         </Link>
 
-        <div className="text-sm text-black mb-2">
+        <div className="text-sm text-gray-700 mb-2 font-medium">
           <span>{item.species}</span>
           {item.seller.nickname && (
             <>
@@ -73,46 +73,57 @@ export function ItemCard({ item }: ItemCardProps) {
         </div>
 
         <div className="mb-3">
-          <div className="text-lg font-bold text-green-600">
+          <div className="text-xl font-bold text-green-600 mb-1">
             {formatPrice(item.currentPrice)}원
           </div>
           {item.buyNowPrice && (
-            <div className="text-sm text-black">
+            <div className="text-sm text-gray-600 font-medium">
               즉시구매: {formatPrice(item.buyNowPrice)}원
             </div>
           )}
         </div>
 
         {isLive && timeRemaining && (
-          <div className="flex items-center text-sm text-red-600 mb-3">
+          <div className="flex items-center text-sm text-red-600 mb-3 font-medium">
             <Clock className="h-4 w-4 mr-1" />
             <span>{timeRemaining}</span>
           </div>
         )}
 
-        <div className="flex items-center justify-between text-sm text-black mb-3">
+        <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
           <div className="flex items-center space-x-3">
-            <span>입찰 {item._count.bids}</span>
+            <span className="font-medium">입찰 {item._count.bids}</span>
             <div className="flex items-center">
               <Heart className="h-4 w-4 mr-1" />
-              <span>{item._count.watchlists}</span>
+              <span className="font-medium">{item._count.watchlists}</span>
             </div>
           </div>
         </div>
 
         <div className="flex space-x-2">
           {isLive && (
-            <Button asChild className="flex-1">
+            <Button
+              asChild
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold"
+            >
               <Link href={`/items/${item.id}`}>입찰하기</Link>
             </Button>
           )}
           {item.buyNowPrice && isLive && (
-            <Button variant="outline" asChild className="flex-1">
+            <Button
+              variant="outline"
+              asChild
+              className="flex-1 border-green-600 text-green-600 hover:bg-green-50 font-semibold"
+            >
               <Link href={`/items/${item.id}/buy-now`}>즉시구매</Link>
             </Button>
           )}
           {!isLive && (
-            <Button variant="outline" asChild className="flex-1">
+            <Button
+              variant="outline"
+              asChild
+              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold"
+            >
               <Link href={`/items/${item.id}`}>상세보기</Link>
             </Button>
           )}
