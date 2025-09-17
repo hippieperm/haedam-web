@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { formatPriceInput, parsePriceInput, formatPhoneNumber } from "@/lib/utils";
 import {
   Upload,
   X,
@@ -70,6 +71,30 @@ export default function SellPage() {
     }));
   };
 
+  // 가격 입력 핸들러
+  const handlePriceInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value } = e.target;
+    const formattedValue = formatPriceInput(value);
+    setFormData((prev) => ({
+      ...prev,
+      [name]: formattedValue,
+    }));
+  };
+
+  // 전화번호 입력 핸들러
+  const handlePhoneInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value } = e.target;
+    const formattedValue = formatPhoneNumber(value);
+    setFormData((prev) => ({
+      ...prev,
+      [name]: formattedValue,
+    }));
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
 
@@ -110,9 +135,15 @@ export default function SellPage() {
       // FormData 생성
       const submitData = new FormData();
 
-      // 기본 정보
+      // 기본 정보 (가격 필드는 파싱된 값으로 전송)
       Object.entries(formData).forEach(([key, value]) => {
-        if (value) submitData.append(key, value);
+        if (value) {
+          if (['startPrice', 'buyNowPrice', 'reservePrice', 'bidStep'].includes(key)) {
+            submitData.append(key, parsePriceInput(value).toString());
+          } else {
+            submitData.append(key, value);
+          }
+        }
       });
 
       // 미디어 파일 추가
@@ -452,13 +483,13 @@ export default function SellPage() {
                     시작가 (원) *
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     name="startPrice"
                     required
                     value={formData.startPrice}
-                    onChange={handleInputChange}
+                    onChange={handlePriceInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
-                    placeholder="100000"
+                    placeholder="100,000"
                   />
                 </div>
 
@@ -467,13 +498,13 @@ export default function SellPage() {
                     입찰 단위 (원) *
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     name="bidStep"
                     required
                     value={formData.bidStep}
-                    onChange={handleInputChange}
+                    onChange={handlePriceInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
-                    placeholder="10000"
+                    placeholder="10,000"
                   />
                 </div>
               </div>
@@ -484,12 +515,12 @@ export default function SellPage() {
                     즉시구매가 (원)
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     name="buyNowPrice"
                     value={formData.buyNowPrice}
-                    onChange={handleInputChange}
+                    onChange={handlePriceInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
-                    placeholder="500000"
+                    placeholder="500,000"
                   />
                 </div>
 
@@ -498,12 +529,12 @@ export default function SellPage() {
                     최저 낙찰가 (원)
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     name="reservePrice"
                     value={formData.reservePrice}
-                    onChange={handleInputChange}
+                    onChange={handlePriceInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
-                    placeholder="200000"
+                    placeholder="200,000"
                   />
                 </div>
               </div>
@@ -691,6 +722,7 @@ export default function SellPage() {
               variant="outline"
               onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
               disabled={currentStep === 1}
+              className="border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold px-6 py-2"
             >
               이전
             </Button>
@@ -699,6 +731,7 @@ export default function SellPage() {
               <Button
                 type="button"
                 onClick={() => setCurrentStep(Math.min(4, currentStep + 1))}
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2"
               >
                 다음
               </Button>
@@ -706,7 +739,7 @@ export default function SellPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2"
               >
                 {loading ? "등록 중..." : "상품 등록하기"}
               </Button>

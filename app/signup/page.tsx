@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { formatPhoneNumber } from "@/lib/utils";
 import {
   Eye,
   EyeOff,
@@ -90,6 +91,16 @@ export default function SignupPage() {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  // 전화번호 입력 핸들러
+  const handlePhoneInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const formattedValue = formatPhoneNumber(value);
+    setFormData((prev) => ({
+      ...prev,
+      [name]: formattedValue,
     }));
   };
 
@@ -249,9 +260,9 @@ export default function SignupPage() {
                     type="tel"
                     autoComplete="tel"
                     value={formData.phone}
-                    onChange={handleInputChange}
+                    onChange={handlePhoneInputChange}
                     className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                    placeholder="전화번호를 입력하세요 (선택사항)"
+                    placeholder="010-1234-5678"
                   />
                 </div>
               </div>
