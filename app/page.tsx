@@ -54,15 +54,24 @@ export default function HomePage() {
               만나보세요. 전문가가 검수한 신뢰할 수 있는 분재만을 제공합니다.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" asChild>
-                <Link href="/auctions">
+              <Button
+                size="lg"
+                asChild
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <Link href="/auctions" className="flex items-center">
                   <Gavel className="mr-2 h-5 w-5" />
                   경매 참여하기
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/buy-now">
-                  <ShoppingCart className="mr-2 h-5 w-5" />
+              <Button
+                size="lg"
+                variant="outline"
+                asChild
+                className="border-2 border-green-200 text-green-700 bg-green-50 hover:border-green-400 hover:text-green-800 hover:bg-green-100 font-medium px-6 py-3 rounded-lg transition-all duration-200 shadow-sm"
+              >
+                <Link href="/buy-now" className="flex items-center">
+                  <ShoppingCart className="mr-2 h-4 w-4" />
                   즉시구매
                 </Link>
               </Button>
@@ -130,7 +139,11 @@ export default function HomePage() {
                 지금 가장 인기 있는 분재 경매를 확인해보세요
               </p>
             </div>
-            <Button variant="outline" asChild>
+            <Button
+              variant="outline"
+              asChild
+              className="border-2 border-green-200 text-green-700 bg-green-50 hover:border-green-400 hover:text-green-800 hover:bg-green-100 font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-sm"
+            >
               <Link href="/auctions">전체보기</Link>
             </Button>
           </div>
@@ -174,10 +187,19 @@ export default function HomePage() {
             창출할 수 있습니다.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" asChild>
+            <Button
+              size="lg"
+              asChild
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
               <Link href="/signup">무료 회원가입</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="border-2 border-green-200 text-green-700 bg-green-50 hover:border-green-400 hover:text-green-800 hover:bg-green-100 font-medium px-6 py-3 rounded-lg transition-all duration-200 shadow-sm"
+            >
               <Link href="/sell">판매자 등록하기</Link>
             </Button>
           </div>
