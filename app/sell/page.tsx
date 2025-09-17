@@ -314,7 +314,7 @@ export default function SellPage() {
                   required
                   value={formData.title}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                   placeholder="예: 50년생 흑송 문인목"
                 />
               </div>
@@ -328,7 +328,7 @@ export default function SellPage() {
                   rows={4}
                   value={formData.description}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                   placeholder="분재의 특징, 관리 방법 등을 자세히 설명해주세요"
                 />
               </div>
@@ -343,9 +343,9 @@ export default function SellPage() {
                     required
                     value={formData.species}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                   >
-                    <option value="" className="text-gray-800">
+                    <option value="" className="text-gray-500">
                       수종을 선택하세요
                     </option>
                     {speciesOptions.map((option) => (
@@ -368,9 +368,9 @@ export default function SellPage() {
                     name="style"
                     value={formData.style}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                   >
-                    <option value="" className="text-gray-800">
+                    <option value="" className="text-gray-500">
                       수형을 선택하세요
                     </option>
                     {styleOptions.map((option) => (
@@ -396,7 +396,7 @@ export default function SellPage() {
                     name="heightCm"
                     value={formData.heightCm}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                     placeholder="30"
                   />
                 </div>
@@ -410,7 +410,7 @@ export default function SellPage() {
                     name="crownWidthCm"
                     value={formData.crownWidthCm}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                     placeholder="25"
                   />
                 </div>
@@ -424,7 +424,7 @@ export default function SellPage() {
                     name="trunkDiameterCm"
                     value={formData.trunkDiameterCm}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                     placeholder="5"
                   />
                 </div>
@@ -439,7 +439,7 @@ export default function SellPage() {
                   name="ageYearsEst"
                   value={formData.ageYearsEst}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                   placeholder="15"
                 />
               </div>
@@ -453,7 +453,7 @@ export default function SellPage() {
                   rows={3}
                   value={formData.healthNotes}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                   placeholder="분재의 건강 상태, 질병 여부 등을 설명해주세요"
                 />
               </div>
@@ -467,7 +467,7 @@ export default function SellPage() {
                   rows={3}
                   value={formData.careHistory}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                   placeholder="이전 관리 방법, 시기 등을 설명해주세요"
                 />
               </div>
@@ -492,7 +492,7 @@ export default function SellPage() {
                     required
                     value={formData.startPrice}
                     onChange={handlePriceInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                     placeholder="100,000"
                   />
                 </div>
@@ -507,7 +507,7 @@ export default function SellPage() {
                     required
                     value={formData.bidStep}
                     onChange={handlePriceInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                     placeholder="10,000"
                   />
                 </div>
@@ -523,7 +523,7 @@ export default function SellPage() {
                     name="buyNowPrice"
                     value={formData.buyNowPrice}
                     onChange={handlePriceInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                     placeholder="500,000"
                   />
                 </div>
@@ -537,7 +537,7 @@ export default function SellPage() {
                     name="reservePrice"
                     value={formData.reservePrice}
                     onChange={handlePriceInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                     placeholder="200,000"
                   />
                 </div>
@@ -554,7 +554,7 @@ export default function SellPage() {
                     required
                     value={formData.startsAt}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                   />
                 </div>
 
@@ -568,7 +568,7 @@ export default function SellPage() {
                     required
                     value={formData.endsAt}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                   />
                 </div>
               </div>
@@ -582,7 +582,7 @@ export default function SellPage() {
                   name="autoExtendMinutes"
                   value={formData.autoExtendMinutes}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                   placeholder="5"
                 />
                 <p className="text-sm text-black mt-1">
@@ -675,7 +675,7 @@ export default function SellPage() {
                   required
                   value={formData.shippingMethod}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                 >
                   {shippingMethodOptions.map((option) => (
                     <option
@@ -698,7 +698,7 @@ export default function SellPage() {
                   rows={3}
                   value={formData.shippingFeePolicy}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                   placeholder="배송비 부담 방법, 지역별 배송비 등을 설명해주세요"
                 />
               </div>
@@ -712,7 +712,7 @@ export default function SellPage() {
                   rows={3}
                   value={formData.packagingNotes}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-800 text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                   placeholder="분재 포장 시 주의사항, 특별한 요청사항 등을 설명해주세요"
                 />
               </div>
