@@ -113,7 +113,7 @@ export function ItemCard({ item }: ItemCardProps) {
             <Button
               variant="outline"
               asChild
-              className="flex-1 border-green-600 text-green-600 hover:bg-green-50 font-semibold"
+              className="flex-1 border-2 border-orange-300 text-orange-600 bg-orange-50 hover:border-orange-400 hover:text-orange-700 hover:bg-orange-100 font-semibold"
             >
               <Link href={`/items/${item.id}/buy-now`}>즉시구매</Link>
             </Button>
