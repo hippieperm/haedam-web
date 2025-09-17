@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { formatPriceInput, parsePriceInput, formatPhoneNumber } from "@/lib/utils";
+import {
+  formatPriceInput,
+  parsePriceInput,
+  formatPhoneNumber,
+} from "@/lib/utils";
 import {
   Upload,
   X,
@@ -72,9 +76,7 @@ export default function SellPage() {
   };
 
   // 가격 입력 핸들러
-  const handlePriceInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handlePriceInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const formattedValue = formatPriceInput(value);
     setFormData((prev) => ({
@@ -84,9 +86,7 @@ export default function SellPage() {
   };
 
   // 전화번호 입력 핸들러
-  const handlePhoneInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handlePhoneInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const formattedValue = formatPhoneNumber(value);
     setFormData((prev) => ({
@@ -138,7 +138,11 @@ export default function SellPage() {
       // 기본 정보 (가격 필드는 파싱된 값으로 전송)
       Object.entries(formData).forEach(([key, value]) => {
         if (value) {
-          if (['startPrice', 'buyNowPrice', 'reservePrice', 'bidStep'].includes(key)) {
+          if (
+            ["startPrice", "buyNowPrice", "reservePrice", "bidStep"].includes(
+              key
+            )
+          ) {
             submitData.append(key, parsePriceInput(value).toString());
           } else {
             submitData.append(key, value);
