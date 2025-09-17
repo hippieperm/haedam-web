@@ -32,6 +32,7 @@ export default function SellPage() {
   const [success, setSuccess] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const [formData, setFormData] = useState({
     // 기본 정보
@@ -123,6 +124,52 @@ export default function SellPage() {
         URL.revokeObjectURL(file.preview);
       }
       return prev.filter((f) => f.id !== id);
+    });
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const validFiles = files.filter(
+      (file) => file.type.startsWith("image/") || file.type.startsWith("video/")
+    );
+
+    if (validFiles.length === 0) {
+      setError("이미지 또는 동영상 파일만 업로드할 수 있습니다.");
+      return;
+    }
+
+    if (mediaFiles.length + validFiles.length > 10) {
+      setError("최대 10개의 파일만 업로드할 수 있습니다.");
+      return;
+    }
+
+    validFiles.forEach((file) => {
+      if (file.size > 10 * 1024 * 1024) {
+        setError("파일 크기는 10MB 이하여야 합니다.");
+        return;
+      }
+
+      const mediaFile: MediaFile = {
+        id: Math.random().toString(36).substr(2, 9),
+        file,
+        preview: URL.createObjectURL(file),
+        type: file.type.startsWith("video/") ? "VIDEO" : "IMAGE",
+      };
+
+      setMediaFiles((prev) => [...prev, mediaFile]);
     });
   };
 
@@ -599,7 +646,16 @@ export default function SellPage() {
                 미디어 업로드
               </h2>
 
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+              <div
+                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                  isDragOver
+                    ? "border-green-400 bg-green-50"
+                    : "border-gray-300 hover:border-gray-400"
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
                 <input
                   type="file"
                   id="media-upload"
@@ -608,13 +664,30 @@ export default function SellPage() {
                   onChange={handleFileUpload}
                   className="hidden"
                 />
-                <label htmlFor="media-upload" className="cursor-pointer">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-lg font-medium text-black mb-2">
-                    사진과 동영상을 업로드하세요
+                <label htmlFor="media-upload" className="cursor-pointer block">
+                  <Upload
+                    className={`mx-auto h-12 w-12 mb-4 ${
+                      isDragOver ? "text-green-500" : "text-gray-400"
+                    }`}
+                  />
+                  <p
+                    className={`text-lg font-medium mb-2 ${
+                      isDragOver ? "text-green-700" : "text-black"
+                    }`}
+                  >
+                    {isDragOver
+                      ? "파일을 놓으세요"
+                      : "사진과 동영상을 업로드하세요"}
                   </p>
-                  <p className="text-sm text-black">
+                  <p
+                    className={`text-sm ${
+                      isDragOver ? "text-green-600" : "text-black"
+                    }`}
+                  >
                     최대 10개 파일, 각 파일당 10MB 이하
+                  </p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    또는 파일을 드래그하여 놓으세요
                   </p>
                 </label>
               </div>
