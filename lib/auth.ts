@@ -32,7 +32,22 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
       .single()
 
     if (profileError || !profile) {
-      return null
+      // If profile doesn't exist in users table, create fallback from auth data
+      const isAdmin = user.email === process.env.ADMIN_EMAIL
+      const role = isAdmin ? 'ADMIN' : 'USER'
+      
+      return {
+        id: user.id,
+        email: user.email!,
+        role: role,
+        name: user.user_metadata?.name || '사용자',
+        nickname: user.user_metadata?.nickname || 'user',
+        phone: user.user_metadata?.phone || '',
+        profile_image: user.user_metadata?.profile_image,
+        is_verified: user.email_confirmed_at ? true : false,
+        created_at: user.created_at,
+        updated_at: user.updated_at || user.created_at,
+      }
     }
 
     return profile

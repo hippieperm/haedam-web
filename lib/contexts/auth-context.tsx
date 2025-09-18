@@ -67,11 +67,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         // 클라이언트 사이드에서만 실행
         if (typeof window !== "undefined") {
+            // localStorage에서 먼저 확인
             const savedUser = localStorage.getItem("user");
             if (savedUser) {
                 setUser(JSON.parse(savedUser));
             }
-            setLoading(false);
+            
+            // 서버에서 실제 인증 상태 확인
+            checkAuth();
         }
     }, []);
 
