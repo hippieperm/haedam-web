@@ -37,7 +37,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await fetch('/api/items?status=LIVE&limit=4&sort=newest');
+        const response = await fetch('/api/items?limit=4&sort=most_bids');
         const data = await response.json();
         
         if (data.success) {
