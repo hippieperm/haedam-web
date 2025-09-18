@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, X, User, ShoppingCart, Heart, LogOut } from "lucide-react";
+import { Search, Menu, X, User, ShoppingCart, Heart, LogOut, AlertCircle } from "lucide-react";
 import { useAuth } from "@/lib/contexts/auth-context";
+import { Modal } from "@/components/ui/modal";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const { user, logout } = useAuth();
 
   return (
@@ -41,9 +43,18 @@ export function Header() {
             <Link href="/buy-now" className="text-black hover:text-green-600">
               즉시구매
             </Link>
-            <Link href="/sell" className="text-black hover:text-green-600">
-              판매하기
-            </Link>
+            {user ? (
+              <Link href="/sell" className="text-black hover:text-green-600">
+                판매하기
+              </Link>
+            ) : (
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="text-black hover:text-green-600"
+              >
+                판매하기
+              </button>
+            )}
             <Link href="/wishlist" className="text-black hover:text-green-600">
               <Heart className="h-5 w-5" />
             </Link>
@@ -124,13 +135,25 @@ export function Header() {
               >
                 즉시구매
               </Link>
-              <Link
-                href="/sell"
-                className="block px-3 py-2 text-black hover:text-green-600"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                판매하기
-              </Link>
+              {user ? (
+                <Link
+                  href="/sell"
+                  className="block px-3 py-2 text-black hover:text-green-600"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  판매하기
+                </Link>
+              ) : (
+                <button
+                  onClick={() => {
+                    setShowLoginModal(true);
+                    setIsMenuOpen(false);
+                  }}
+                  className="block px-3 py-2 text-black hover:text-green-600 w-full text-left"
+                >
+                  판매하기
+                </button>
+              )}
               <div className="pt-4 border-t border-gray-200">
                 <div className="space-y-2">
                   {user ? (
@@ -174,6 +197,43 @@ export function Header() {
           </div>
         )}
       </div>
+
+      {/* 로그인 필요 모달 */}
+      <Modal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        title="로그인이 필요합니다"
+      >
+        <div className="text-center">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
+            <AlertCircle className="h-6 w-6 text-yellow-600" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            판매하기 기능을 이용하려면 로그인이 필요합니다
+          </h3>
+          <p className="text-sm text-gray-500 mb-6">
+            분재를 판매하려면 먼저 로그인해주세요.
+          </p>
+          <div className="flex space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowLoginModal(false)}
+              className="flex-1"
+            >
+              취소
+            </Button>
+            <Button
+              onClick={() => {
+                setShowLoginModal(false);
+                window.location.href = '/login';
+              }}
+              className="flex-1 bg-green-600 hover:bg-green-700"
+            >
+              로그인하기
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </header>
   );
 }
