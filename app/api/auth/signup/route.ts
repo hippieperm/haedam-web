@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,8 +49,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create user profile in users table
-    const { error: profileError } = await supabase
+    // Create user profile in users table using admin client to bypass RLS
+    const adminSupabase = createAdminClient()
+    
+    // Check if this is the admin email and set role accordingly
+    const isAdmin = body.email === process.env.ADMIN_EMAIL
+    const userRole = isAdmin ? 'ADMIN' : 'USER'
+    
+    const { error: profileError } = await adminSupabase
       .from('users')
       .insert({
         id: data.user.id,
@@ -58,7 +64,7 @@ export async function POST(request: NextRequest) {
         name: body.name,
         nickname: body.nickname,
         phone: body.phone || '',
-        role: 'USER',
+        role: userRole,
         is_verified: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

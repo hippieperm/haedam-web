@@ -21,10 +21,23 @@ export async function GET() {
       .single()
 
     if (profileError || !profile) {
-      return NextResponse.json(
-        { error: '사용자 정보를 찾을 수 없습니다' },
-        { status: 404 }
-      )
+      // If profile doesn't exist, create a basic user object from auth data
+      const isAdmin = user.email === process.env.ADMIN_EMAIL
+      const role = isAdmin ? 'ADMIN' : 'USER'
+      
+      const fallbackUser = {
+        id: user.id,
+        email: user.email!,
+        name: user.user_metadata?.name || '사용자',
+        nickname: user.user_metadata?.nickname || 'user',
+        role: role,
+        is_verified: user.email_confirmed_at ? true : false,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+        phone: user.user_metadata?.phone || '',
+      }
+      
+      return NextResponse.json({ user: fallbackUser })
     }
 
     return NextResponse.json({ user: profile })

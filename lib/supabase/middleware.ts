@@ -35,17 +35,24 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    if (
-        !user &&
-        !request.nextUrl.pathname.startsWith('/login') &&
-        !request.nextUrl.pathname.startsWith('/signup') &&
-        !request.nextUrl.pathname.startsWith('/auth') &&
-        request.nextUrl.pathname !== '/'
-    ) {
-        // no user, potentially respond by redirecting the user to the login page
+    // 로그인이 필요한 페이지들
+    const protectedPaths = ['/sell', '/admin', '/profile', '/my-bids', '/my-items']
+
+    const isProtectedPath = protectedPaths.some(path =>
+        request.nextUrl.pathname.startsWith(path)
+    )
+
+    // 보호된 페이지에 로그인 없이 접근하려는 경우만 리다이렉션
+    if (!user && isProtectedPath) {
+        console.log('Protected path accessed without user:', request.nextUrl.pathname)
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         return NextResponse.redirect(url)
+    }
+
+    // 디버깅을 위한 로그
+    if (isProtectedPath) {
+        console.log('Protected path accessed:', request.nextUrl.pathname, 'User:', user ? 'authenticated' : 'not authenticated')
     }
 
     // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're

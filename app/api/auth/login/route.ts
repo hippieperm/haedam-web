@@ -38,11 +38,23 @@ export async function POST(request: NextRequest) {
       .eq('id', data.user.id)
       .single()
 
+    // If profile doesn't exist, create a basic user object
     if (profileError || !profile) {
-      return NextResponse.json(
-        { error: '사용자 정보를 가져올 수 없습니다' },
-        { status: 500 }
-      )
+      // Check if this is the admin email
+      const isAdmin = data.user.email === process.env.ADMIN_EMAIL
+      const role = isAdmin ? 'ADMIN' : 'USER'
+      
+      return NextResponse.json({
+        success: true,
+        user: {
+          id: data.user.id,
+          email: data.user.email!,
+          name: data.user.user_metadata?.name || '사용자',
+          nickname: data.user.user_metadata?.nickname || 'user',
+          role: role,
+          is_verified: data.user.email_confirmed_at ? true : false,
+        },
+      })
     }
 
     return NextResponse.json({

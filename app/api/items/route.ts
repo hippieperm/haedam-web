@@ -109,6 +109,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 관리자 권한 확인
+    if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        { success: false, message: "상품 등록 권한이 없습니다. 관리자만 상품을 등록할 수 있습니다." },
+        { status: 403 }
+      );
+    }
+
     // FormData 처리
     const formData = await request.formData();
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +17,7 @@ import {
   Camera,
   Video,
 } from "lucide-react";
+import { useAuth } from "@/lib/contexts/auth-context";
 
 interface MediaFile {
   id: string;
@@ -27,12 +28,36 @@ interface MediaFile {
 
 export default function SellPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
+
+  // 인증 확인
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
+
+  // 로딩 중이거나 사용자가 없으면 로딩 화면 표시
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // 리다이렉트 중
+  }
 
   const [formData, setFormData] = useState({
     // 기본 정보
@@ -307,26 +332,23 @@ export default function SellPage() {
             ].map(({ step, title }) => (
               <div key={step} className="flex items-center">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    currentStep >= step
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep >= step
                       ? "bg-green-600 text-white"
                       : "bg-gray-200 text-black"
-                  }`}
+                    }`}
                 >
                   {step}
                 </div>
                 <span
-                  className={`ml-2 text-sm font-medium ${
-                    currentStep >= step ? "text-green-600" : "text-black"
-                  }`}
+                  className={`ml-2 text-sm font-medium ${currentStep >= step ? "text-green-600" : "text-black"
+                    }`}
                 >
                   {title}
                 </span>
                 {step < 4 && (
                   <div
-                    className={`w-16 h-0.5 mx-4 ${
-                      currentStep > step ? "bg-green-600" : "bg-gray-200"
-                    }`}
+                    className={`w-16 h-0.5 mx-4 ${currentStep > step ? "bg-green-600" : "bg-gray-200"
+                      }`}
                   />
                 )}
               </div>
@@ -647,11 +669,10 @@ export default function SellPage() {
               </h2>
 
               <div
-                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                  isDragOver
+                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${isDragOver
                     ? "border-green-400 bg-green-50"
                     : "border-gray-300 hover:border-gray-400"
-                }`}
+                  }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
@@ -666,23 +687,20 @@ export default function SellPage() {
                 />
                 <label htmlFor="media-upload" className="cursor-pointer block">
                   <Upload
-                    className={`mx-auto h-12 w-12 mb-4 ${
-                      isDragOver ? "text-green-500" : "text-gray-400"
-                    }`}
+                    className={`mx-auto h-12 w-12 mb-4 ${isDragOver ? "text-green-500" : "text-gray-400"
+                      }`}
                   />
                   <p
-                    className={`text-lg font-medium mb-2 ${
-                      isDragOver ? "text-green-700" : "text-black"
-                    }`}
+                    className={`text-lg font-medium mb-2 ${isDragOver ? "text-green-700" : "text-black"
+                      }`}
                   >
                     {isDragOver
                       ? "파일을 놓으세요"
                       : "사진과 동영상을 업로드하세요"}
                   </p>
                   <p
-                    className={`text-sm ${
-                      isDragOver ? "text-green-600" : "text-black"
-                    }`}
+                    className={`text-sm ${isDragOver ? "text-green-600" : "text-black"
+                      }`}
                   >
                     최대 10개 파일, 각 파일당 10MB 이하
                   </p>
