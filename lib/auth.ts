@@ -18,7 +18,7 @@ export interface UserProfile {
 
 export async function getCurrentUser(): Promise<UserProfile | null> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -44,7 +44,7 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
 
 export async function getCurrentAuthUser(): Promise<User | null> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error } = await supabase.auth.getUser()
 
     if (error || !user) {
@@ -83,6 +83,6 @@ export async function requireSeller(): Promise<UserProfile> {
 }
 
 export async function signOut() {
-  const supabase = createClient()
+  const supabase = await createClient()
   await supabase.auth.signOut()
 }
