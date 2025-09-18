@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     // Validate input
     const validatedData = loginSchema.parse(body)
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Sign in with Supabase Auth
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       // Check if this is the admin email
       const isAdmin = data.user.email === process.env.ADMIN_EMAIL
       const role = isAdmin ? 'ADMIN' : 'USER'
-      
+
       return NextResponse.json({
         success: true,
         user: {
