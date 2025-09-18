@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
@@ -206,8 +206,9 @@ export async function POST(request: NextRequest) {
 
     console.log('Item created successfully:', item);
 
-    // 미디어 파일 처리 제거 (임시로 주석 처리하여 Storage RLS 문제 우회)
-    /*
+    // 미디어 파일 처리 (인증된 클라이언트 사용)
+    // 서비스 롤 키가 없으므로 인증된 클라이언트 사용
+    const storageSupabase = await createClient();
     const mediaFiles = [];
     let mediaIndex = 0;
 
@@ -215,50 +216,65 @@ export async function POST(request: NextRequest) {
       const file = formData.get(`media_${mediaIndex}`) as File;
       const mediaType = formData.get(`media_type_${mediaIndex}`) as string;
 
-      if (file) {
-        console.log(`Processing media file ${mediaIndex}:`, file.name);
+      if (file && file.size > 0) {
+        console.log(`Processing media file ${mediaIndex}:`, file.name, 'Size:', file.size);
         
-        // Supabase Storage에 파일 업로드
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${item.id}_${mediaIndex}.${fileExt}`;
-        const filePath = `items/${item.id}/${fileName}`;
+        try {
+          // Supabase Storage에 파일 업로드 (관리자 클라이언트 사용)
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${item.id}_${mediaIndex}.${fileExt}`;
+          const filePath = `items/${item.id}/${fileName}`;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('item-media')
-          .upload(filePath, file);
+          const { data: uploadData, error: uploadError } = await storageSupabase.storage
+            .from('item-media')
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
 
-        if (uploadError) {
-          console.error('Upload error:', uploadError);
-          continue;
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            console.error('Upload error details:', JSON.stringify(uploadError, null, 2));
+            continue;
+          }
+
+          console.log('Upload successful:', uploadData);
+
+          // Public URL 생성
+          const { data: urlData } = storageSupabase.storage
+            .from('item-media')
+            .getPublicUrl(filePath);
+
+          mediaFiles.push({
+            item_id: item.id,
+            url: urlData.publicUrl,
+            type: mediaType,
+            sort: mediaIndex,
+            file_name: fileName,
+            file_size: file.size,
+          });
+        } catch (fileError) {
+          console.error(`Error processing file ${mediaIndex}:`, fileError);
         }
-
-        // Public URL 생성
-        const { data: urlData } = supabase.storage
-          .from('item-media')
-          .getPublicUrl(filePath);
-
-        mediaFiles.push({
-          item_id: item.id,
-          url: urlData.publicUrl,
-          type: mediaType,
-          sort: mediaIndex,
-        });
       }
 
       mediaIndex++;
     }
 
-    // 미디어 파일 저장
+    // 미디어 파일 저장 (인증된 클라이언트 사용)
     if (mediaFiles.length > 0) {
+      console.log('Saving media files:', mediaFiles);
       const { error: mediaError } = await supabase
         .from('item_media')
         .insert(mediaFiles);
 
       if (mediaError) {
         console.error('Media save error:', mediaError);
+        console.error('Media save error details:', JSON.stringify(mediaError, null, 2));
+      } else {
+        console.log('Media files saved successfully');
       }
     }
-    */
 
     return NextResponse.json({
       success: true,
