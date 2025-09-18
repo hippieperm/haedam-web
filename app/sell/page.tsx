@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,34 +35,61 @@ export default function SellPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [formData, setFormData] = useState({
-    // 기본 정보
-    title: "",
-    description: "",
-    species: "",
-    style: "",
-    sizeClass: "",
-    heightCm: "",
-    crownWidthCm: "",
-    trunkDiameterCm: "",
-    ageYearsEst: "",
-    healthNotes: "",
-    originNotes: "",
-    careHistory: "",
 
-    // 경매 설정
-    startPrice: "",
-    buyNowPrice: "",
-    reservePrice: "",
-    bidStep: "",
-    startsAt: "",
-    endsAt: "",
-    autoExtendMinutes: "",
+  // Refs for focusing on empty fields
+  const titleRef = useRef<HTMLInputElement>(null!);
+  const speciesRef = useRef<HTMLSelectElement>(null!);
+  const startPriceRef = useRef<HTMLInputElement>(null!);
+  const bidStepRef = useRef<HTMLInputElement>(null!);
+  const startsAtRef = useRef<HTMLInputElement>(null!);
+  const endsAtRef = useRef<HTMLInputElement>(null!);
+  const shippingMethodRef = useRef<HTMLSelectElement>(null!);
 
-    // 배송 정보
-    shippingMethod: "COURIER",
-    shippingFeePolicy: "",
-    packagingNotes: "",
+  const [formData, setFormData] = useState(() => {
+    // 현재 날짜와 시간 설정
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    // datetime-local 형식으로 변환 (YYYY-MM-DDTHH:MM)
+    const formatDateTime = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
+    return {
+      // 기본 정보
+      title: "",
+      description: "",
+      species: "",
+      style: "",
+      sizeClass: "",
+      heightCm: "",
+      crownWidthCm: "",
+      trunkDiameterCm: "",
+      ageYearsEst: "",
+      healthNotes: "",
+      originNotes: "",
+      careHistory: "",
+
+      // 경매 설정
+      startPrice: "",
+      buyNowPrice: "",
+      reservePrice: "",
+      bidStep: "",
+      startsAt: formatDateTime(now),
+      endsAt: formatDateTime(tomorrow),
+      autoExtendMinutes: "",
+
+      // 배송 정보
+      shippingMethod: "COURIER",
+      shippingFeePolicy: "",
+      packagingNotes: "",
+    };
   });
 
   // 사용자가 없으면 로그인 페이지로 리다이렉트
@@ -71,6 +98,100 @@ export default function SellPage() {
       router.push('/login');
     }
   }, [user, authLoading, router]);
+
+  // 각 단계별 유효성 검사 함수
+  const validateStep = (step: number): boolean => {
+    switch (step) {
+      case 1: // 기본 정보
+        return !!(formData.title && formData.species);
+      case 2: // 경매 설정
+        const hasRequiredFields = !!(
+          formData.startPrice &&
+          formData.bidStep &&
+          formData.startsAt &&
+          formData.endsAt
+        );
+
+        // 시작 시간이 종료 시간보다 빠른지 확인
+        const startTime = new Date(formData.startsAt);
+        const endTime = new Date(formData.endsAt);
+        const isValidTimeRange = startTime < endTime;
+
+        return hasRequiredFields && isValidTimeRange;
+      case 3: // 배송 정보
+        return !!(formData.shippingMethod);
+      case 4: // 미디어 (선택사항)
+        return true; // 미디어는 선택사항
+      default:
+        return false;
+    }
+  };
+
+  // 다음 단계로 이동하는 함수
+  const goToNextStep = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(Math.min(4, currentStep + 1));
+      setError(""); // 오류 메시지 초기화
+    } else {
+      // 필수 필드가 누락된 경우 오류 메시지 표시 및 첫 번째 빈 필드에 포커스
+      const missingFields: string[] = [];
+      let firstEmptyFieldRef: React.RefObject<HTMLInputElement | HTMLSelectElement> | undefined = undefined;
+
+      if (currentStep === 1) {
+        if (!formData.title) {
+          missingFields.push("상품명");
+          if (!firstEmptyFieldRef) firstEmptyFieldRef = titleRef;
+        }
+        if (!formData.species) {
+          missingFields.push("수종");
+          if (!firstEmptyFieldRef) firstEmptyFieldRef = speciesRef;
+        }
+      } else if (currentStep === 2) {
+        if (!formData.startPrice) {
+          missingFields.push("시작 가격");
+          if (!firstEmptyFieldRef) firstEmptyFieldRef = startPriceRef;
+        }
+        if (!formData.bidStep) {
+          missingFields.push("입찰 단위");
+          if (!firstEmptyFieldRef) firstEmptyFieldRef = bidStepRef;
+        }
+        if (!formData.startsAt) {
+          missingFields.push("경매 시작 시간");
+          if (!firstEmptyFieldRef) firstEmptyFieldRef = startsAtRef;
+        }
+        if (!formData.endsAt) {
+          missingFields.push("경매 종료 시간");
+          if (!firstEmptyFieldRef) firstEmptyFieldRef = endsAtRef;
+        }
+
+        // 시간 유효성 검사
+        if (formData.startsAt && formData.endsAt) {
+          const startTime = new Date(formData.startsAt);
+          const endTime = new Date(formData.endsAt);
+          if (startTime >= endTime) {
+            missingFields.push("올바른 경매 기간 (종료 시간이 시작 시간보다 늦어야 함)");
+            if (!firstEmptyFieldRef) firstEmptyFieldRef = endsAtRef;
+          }
+        }
+      } else if (currentStep === 3) {
+        if (!formData.shippingMethod) {
+          missingFields.push("배송 방법");
+          if (!firstEmptyFieldRef) firstEmptyFieldRef = shippingMethodRef;
+        }
+      }
+
+      // 첫 번째 빈 필드에 포커스
+      if (firstEmptyFieldRef && firstEmptyFieldRef.current) {
+        firstEmptyFieldRef.current.focus();
+        firstEmptyFieldRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+
+      setError(`다음 필수 항목을 입력해주세요: ${missingFields.join(", ")}`);
+    }
+  };
 
   // 로딩 중이면 로딩 화면 표시
   if (authLoading) {
@@ -106,6 +227,15 @@ export default function SellPage() {
       ...prev,
       [name]: value,
     }));
+
+    // 입력 시 오류 메시지 초기화 (해당 단계의 유효성 검사를 통과한 경우)
+    if (error) {
+      setTimeout(() => {
+        if (validateStep(currentStep)) {
+          setError("");
+        }
+      }, 100);
+    }
   };
 
   // 가격 입력 핸들러
@@ -334,8 +464,8 @@ export default function SellPage() {
             {[
               { step: 1, title: "기본 정보" },
               { step: 2, title: "경매 설정" },
-              { step: 3, title: "미디어" },
-              { step: 4, title: "배송 정보" },
+              { step: 3, title: "배송 정보" },
+              { step: 4, title: "미디어" },
             ].map(({ step, title }) => (
               <div key={step} className="flex items-center">
                 <div
@@ -388,6 +518,7 @@ export default function SellPage() {
                   type="text"
                   name="title"
                   required
+                  ref={titleRef}
                   value={formData.title}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
@@ -417,6 +548,7 @@ export default function SellPage() {
                   <select
                     name="species"
                     required
+                    ref={speciesRef}
                     value={formData.species}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
@@ -566,6 +698,7 @@ export default function SellPage() {
                     type="text"
                     name="startPrice"
                     required
+                    ref={startPriceRef}
                     value={formData.startPrice}
                     onChange={handlePriceInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
@@ -581,6 +714,7 @@ export default function SellPage() {
                     type="text"
                     name="bidStep"
                     required
+                    ref={bidStepRef}
                     value={formData.bidStep}
                     onChange={handlePriceInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
@@ -628,6 +762,7 @@ export default function SellPage() {
                     type="datetime-local"
                     name="startsAt"
                     required
+                    ref={startsAtRef}
                     value={formData.startsAt}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
@@ -642,6 +777,7 @@ export default function SellPage() {
                     type="datetime-local"
                     name="endsAt"
                     required
+                    ref={endsAtRef}
                     value={formData.endsAt}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
@@ -668,8 +804,69 @@ export default function SellPage() {
             </div>
           )}
 
-          {/* Step 3: Media Upload */}
+          {/* Step 3: Shipping Information */}
           {currentStep === 3 && (
+            <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+              <h2 className="text-xl font-semibold text-black mb-4">
+                배송 정보
+              </h2>
+
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">
+                  배송 방법 *
+                </label>
+                <select
+                  name="shippingMethod"
+                  required
+                  ref={shippingMethodRef}
+                  value={formData.shippingMethod}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
+                >
+                  {shippingMethodOptions.map((option) => (
+                    <option
+                      key={option.value}
+                      value={option.value}
+                      className="text-black"
+                    >
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">
+                  배송비 정책
+                </label>
+                <textarea
+                  name="shippingFeePolicy"
+                  rows={3}
+                  value={formData.shippingFeePolicy}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
+                  placeholder="배송비 부담 방법, 지역별 배송비 등을 설명해주세요"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">
+                  포장 주의사항
+                </label>
+                <textarea
+                  name="packagingNotes"
+                  rows={3}
+                  value={formData.packagingNotes}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
+                  placeholder="분재 포장 시 주의사항, 특별한 요청사항 등을 설명해주세요"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Media Upload */}
+          {currentStep === 4 && (
             <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
               <h2 className="text-xl font-semibold text-black mb-4">
                 미디어 업로드
@@ -757,66 +954,6 @@ export default function SellPage() {
             </div>
           )}
 
-          {/* Step 4: Shipping Information */}
-          {currentStep === 4 && (
-            <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
-              <h2 className="text-xl font-semibold text-black mb-4">
-                배송 정보
-              </h2>
-
-              <div>
-                <label className="block text-sm font-medium text-black mb-2">
-                  배송 방법 *
-                </label>
-                <select
-                  name="shippingMethod"
-                  required
-                  value={formData.shippingMethod}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
-                >
-                  {shippingMethodOptions.map((option) => (
-                    <option
-                      key={option.value}
-                      value={option.value}
-                      className="text-black"
-                    >
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-black mb-2">
-                  배송비 정책
-                </label>
-                <textarea
-                  name="shippingFeePolicy"
-                  rows={3}
-                  value={formData.shippingFeePolicy}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
-                  placeholder="배송비 부담 방법, 지역별 배송비 등을 설명해주세요"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-black mb-2">
-                  포장 주의사항
-                </label>
-                <textarea
-                  name="packagingNotes"
-                  rows={3}
-                  value={formData.packagingNotes}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
-                  placeholder="분재 포장 시 주의사항, 특별한 요청사항 등을 설명해주세요"
-                />
-              </div>
-            </div>
-          )}
-
           {/* Navigation Buttons */}
           <div className="flex justify-between">
             <Button
@@ -832,7 +969,7 @@ export default function SellPage() {
             {currentStep < 4 ? (
               <Button
                 type="button"
-                onClick={() => setCurrentStep(Math.min(4, currentStep + 1))}
+                onClick={goToNextStep}
                 className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2"
               >
                 다음
