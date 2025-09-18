@@ -50,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (response.ok) {
                 const data = await response.json();
                 setUser(data.user);
+                localStorage.setItem("user", JSON.stringify(data.user));
             } else {
                 setUser(null);
                 localStorage.removeItem("user");
@@ -70,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (savedUser) {
                 setUser(JSON.parse(savedUser));
             }
-            checkAuth();
+            setLoading(false);
         }
     }, []);
 
