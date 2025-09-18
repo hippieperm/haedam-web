@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function GET() {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error } = await supabase.auth.getUser()
 
     if (error || !user) {
@@ -24,7 +24,7 @@ export async function GET() {
       // If profile doesn't exist, create a basic user object from auth data
       const isAdmin = user.email === process.env.ADMIN_EMAIL
       const role = isAdmin ? 'ADMIN' : 'USER'
-      
+
       const fallbackUser = {
         id: user.id,
         email: user.email!,
@@ -36,7 +36,7 @@ export async function GET() {
         updated_at: user.updated_at,
         phone: user.user_metadata?.phone || '',
       }
-      
+
       return NextResponse.json({ user: fallbackUser })
     }
 
