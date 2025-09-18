@@ -35,6 +35,9 @@ export default function SellPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [shippingCost, setShippingCost] = useState<number>(0);
 
   // Refs for focusing on empty fields
   const titleRef = useRef<HTMLInputElement>(null!);
@@ -99,6 +102,64 @@ export default function SellPage() {
     }
   }, [user, authLoading, router]);
 
+  // 자동 저장 기능
+  useEffect(() => {
+    if (typeof window !== 'undefined' && user) {
+      const savedData = localStorage.getItem(`draft_${user.id}`);
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData);
+          setFormData(parsed.formData);
+          setCurrentStep(parsed.currentStep || 1);
+          setTags(parsed.tags || []);
+        } catch (error) {
+          console.error('Failed to load saved draft:', error);
+        }
+      }
+    }
+  }, [user]);
+
+  // 폼 데이터 변경 시 자동 저장
+  useEffect(() => {
+    if (typeof window !== 'undefined' && user) {
+      const timeoutId = setTimeout(() => {
+        const draftData = {
+          formData,
+          currentStep,
+          tags,
+          savedAt: new Date().toISOString(),
+        };
+        localStorage.setItem(`draft_${user.id}`, JSON.stringify(draftData));
+      }, 1000); // 1초 후 저장
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [formData, currentStep, tags, user]);
+
+  // 가격 유효성 검사 함수
+  const validatePrices = (): { isValid: boolean; message: string } => {
+    const startPrice = formData.startPrice ? parsePriceInput(formData.startPrice) : 0;
+    const reservePrice = formData.reservePrice ? parsePriceInput(formData.reservePrice) : 0;
+    const buyNowPrice = formData.buyNowPrice ? parsePriceInput(formData.buyNowPrice) : 0;
+
+    // 최저 낙찰가는 시작가보다 높아야 함
+    if (reservePrice > 0 && startPrice > 0 && reservePrice <= startPrice) {
+      return { isValid: false, message: "최저 낙찰가는 시작가보다 높아야 합니다." };
+    }
+
+    // 즉시구매가는 최저 낙찰가보다 높아야 함
+    if (buyNowPrice > 0 && reservePrice > 0 && buyNowPrice <= reservePrice) {
+      return { isValid: false, message: "즉시구매가는 최저 낙찰가보다 높아야 합니다." };
+    }
+
+    // 즉시구매가는 시작가보다 높아야 함
+    if (buyNowPrice > 0 && startPrice > 0 && buyNowPrice <= startPrice) {
+      return { isValid: false, message: "즉시구매가는 시작가보다 높아야 합니다." };
+    }
+
+    return { isValid: true, message: "" };
+  };
+
   // 각 단계별 유효성 검사 함수
   const validateStep = (step: number): boolean => {
     switch (step) {
@@ -117,11 +178,14 @@ export default function SellPage() {
         const endTime = new Date(formData.endsAt);
         const isValidTimeRange = startTime < endTime;
 
-        return hasRequiredFields && isValidTimeRange;
+        // 가격 유효성 검사
+        const priceValidation = validatePrices();
+
+        return hasRequiredFields && isValidTimeRange && priceValidation.isValid;
       case 3: // 배송 정보
         return !!(formData.shippingMethod);
       case 4: // 미디어 (선택사항)
-        return true; // 미디어는 선택사항
+        return mediaFiles.length >= 1; // 최소 1장 이상의 이미지 필요
       default:
         return false;
     }
@@ -173,10 +237,21 @@ export default function SellPage() {
             if (!firstEmptyFieldRef) firstEmptyFieldRef = endsAtRef;
           }
         }
+
+        // 가격 유효성 검사
+        const priceValidation = validatePrices();
+        if (!priceValidation.isValid) {
+          missingFields.push(priceValidation.message);
+          if (!firstEmptyFieldRef) firstEmptyFieldRef = startPriceRef;
+        }
       } else if (currentStep === 3) {
         if (!formData.shippingMethod) {
           missingFields.push("배송 방법");
           if (!firstEmptyFieldRef) firstEmptyFieldRef = shippingMethodRef;
+        }
+      } else if (currentStep === 4) {
+        if (mediaFiles.length < 1) {
+          missingFields.push("최소 1장 이상의 이미지");
         }
       }
 
@@ -227,6 +302,12 @@ export default function SellPage() {
       ...prev,
       [name]: value,
     }));
+
+    // 높이 변경 시 배송비 재계산
+    if (name === "heightCm") {
+      const cost = calculateShippingCost(formData.shippingMethod, value);
+      setShippingCost(cost);
+    }
 
     // 입력 시 오류 메시지 초기화 (해당 단계의 유효성 검사를 통과한 경우)
     if (error) {
@@ -306,6 +387,156 @@ export default function SellPage() {
     });
   };
 
+  // 이미지 순서 변경 함수
+  const moveMediaFile = (dragIndex: number, dropIndex: number) => {
+    setMediaFiles((prev) => {
+      const newFiles = [...prev];
+      const draggedFile = newFiles[dragIndex];
+      newFiles.splice(dragIndex, 1);
+      newFiles.splice(dropIndex, 0, draggedFile);
+      return newFiles;
+    });
+  };
+
+  // 태그 관리 함수들
+  const addTag = (tag: string) => {
+    const trimmedTag = tag.trim();
+    if (trimmedTag && !tags.includes(trimmedTag) && tags.length < 10) {
+      setTags((prev) => [...prev, trimmedTag]);
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags((prev) => prev.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTag(tagInput);
+    } else if (e.key === 'Backspace' && !tagInput && tags.length > 0) {
+      removeTag(tags[tags.length - 1]);
+    }
+  };
+
+  // 배송비 계산 함수
+  const calculateShippingCost = (method: string, heightCm?: string) => {
+    const height = heightCm ? parseFloat(heightCm) : 0;
+    
+    switch (method) {
+      case "DIRECT_PICKUP":
+        return 0;
+      case "COURIER":
+        if (height <= 30) return 3000;
+        if (height <= 60) return 5000;
+        return 8000;
+      case "QUICK":
+        if (height <= 30) return 8000;
+        if (height <= 60) return 12000;
+        return 15000;
+      case "FREIGHT":
+        if (height <= 100) return 15000;
+        if (height <= 150) return 25000;
+        return 35000;
+      default:
+        return 0;
+    }
+  };
+
+  // 배송 방법 변경 시 배송비 자동 계산
+  const handleShippingMethodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const method = e.target.value;
+    const cost = calculateShippingCost(method, formData.heightCm);
+    setShippingCost(cost);
+    handleInputChange(e);
+  };
+
+  // 경매 일정 추천 함수
+  const getOptimalAuctionTimes = () => {
+    const now = new Date();
+    const recommendations = [];
+
+    // 이번 주 일요일 오후 7시 (가장 인기 있는 시간)
+    const thisWeekSunday = new Date(now);
+    thisWeekSunday.setDate(now.getDate() + (7 - now.getDay()) % 7);
+    thisWeekSunday.setHours(19, 0, 0, 0);
+    if (thisWeekSunday > now) {
+      const endTime = new Date(thisWeekSunday);
+      endTime.setDate(endTime.getDate() + 3); // 3일 경매
+      recommendations.push({
+        label: "이번 주 일요일 저녁 (추천)",
+        start: thisWeekSunday,
+        end: endTime,
+        reason: "가장 많은 사용자가 접속하는 시간"
+      });
+    }
+
+    // 다음 주 일요일 오후 7시
+    const nextWeekSunday = new Date(thisWeekSunday);
+    nextWeekSunday.setDate(nextWeekSunday.getDate() + 7);
+    const nextWeekEnd = new Date(nextWeekSunday);
+    nextWeekEnd.setDate(nextWeekEnd.getDate() + 3);
+    recommendations.push({
+      label: "다음 주 일요일 저녁",
+      start: nextWeekSunday,
+      end: nextWeekEnd,
+      reason: "충분한 준비 시간 확보"
+    });
+
+    // 평일 저녁 8시 (직장인 대상)
+    const weekdayEvening = new Date(now);
+    weekdayEvening.setDate(now.getDate() + (now.getDay() === 0 ? 3 : 5 - now.getDay()));
+    weekdayEvening.setHours(20, 0, 0, 0);
+    if (weekdayEvening > now) {
+      const weekdayEnd = new Date(weekdayEvening);
+      weekdayEnd.setDate(weekdayEnd.getDate() + 2); // 2일 경매
+      recommendations.push({
+        label: "평일 저녁",
+        start: weekdayEvening,
+        end: weekdayEnd,
+        reason: "직장인 접속 시간대"
+      });
+    }
+
+    return recommendations;
+  };
+
+  const formatDateTime = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  const applyRecommendedTime = (start: Date, end: Date) => {
+    setFormData(prev => ({
+      ...prev,
+      startsAt: formatDateTime(start),
+      endsAt: formatDateTime(end)
+    }));
+  };
+
+  // 수종별 가격 가이드
+  const getPriceGuide = (species: string) => {
+    const guides: { [key: string]: { min: number; max: number; description: string } } = {
+      "소나무": { min: 50000, max: 500000, description: "일반적인 국내 소나무 분재" },
+      "주목": { min: 80000, max: 800000, description: "관리가 까다로운 고급 수종" },
+      "진백": { min: 30000, max: 300000, description: "초보자도 기르기 쉬운 수종" },
+      "흑송": { min: 100000, max: 1000000, description: "일본 전통 분재의 대표 수종" },
+      "단풍": { min: 40000, max: 400000, description: "계절 변화가 아름다운 수종" },
+      "벚나무": { min: 60000, max: 600000, description: "꽃이 피는 화분류" },
+      "은행나무": { min: 70000, max: 700000, description: "낙엽 활엽수 중 인기 수종" },
+      "느티나무": { min: 50000, max: 500000, description: "잎이 작고 분지가 좋은 수종" },
+      "참나무": { min: 40000, max: 400000, description: "국내 자생종으로 관리 용이" },
+      "기타": { min: 30000, max: 300000, description: "기타 수종" }
+    };
+
+    return guides[species] || guides["기타"];
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -352,12 +583,84 @@ export default function SellPage() {
     });
   };
 
+  // 중복 상품 체크 함수
+  const checkDuplicateProduct = async () => {
+    try {
+      const response = await fetch(`/api/items?search=${encodeURIComponent(formData.title)}&status=LIVE`);
+      const data = await response.json();
+      
+      if (data.success && data.data.items.length > 0) {
+        const similarItems = data.data.items.filter((item: any) => {
+          // 제목 유사도 체크 (80% 이상 유사)
+          const similarity = calculateSimilarity(formData.title.toLowerCase(), item.title.toLowerCase());
+          return similarity > 0.8;
+        });
+
+        if (similarItems.length > 0) {
+          const confirm = window.confirm(
+            `유사한 상품이 이미 등록되어 있습니다:\n"${similarItems[0].title}"\n\n그래도 등록하시겠습니까?`
+          );
+          return confirm;
+        }
+      }
+      return true;
+    } catch (error) {
+      console.error('중복 체크 중 오류:', error);
+      return true; // 오류 시에는 등록 허용
+    }
+  };
+
+  // 문자열 유사도 계산 (Levenshtein distance 기반)
+  const calculateSimilarity = (str1: string, str2: string): number => {
+    const longer = str1.length > str2.length ? str1 : str2;
+    const shorter = str1.length > str2.length ? str2 : str1;
+
+    if (longer.length === 0) return 1.0;
+
+    const distance = levenshteinDistance(longer, shorter);
+    return (longer.length - distance) / longer.length;
+  };
+
+  const levenshteinDistance = (str1: string, str2: string): number => {
+    const matrix = [];
+
+    for (let i = 0; i <= str2.length; i++) {
+      matrix[i] = [i];
+    }
+
+    for (let j = 0; j <= str1.length; j++) {
+      matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= str2.length; i++) {
+      for (let j = 1; j <= str1.length; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+
+    return matrix[str2.length][str1.length];
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
+      // 중복 상품 체크
+      const canProceed = await checkDuplicateProduct();
+      if (!canProceed) {
+        setLoading(false);
+        return;
+      }
       // FormData 생성
       const submitData = new FormData();
 
@@ -375,6 +678,11 @@ export default function SellPage() {
           }
         }
       });
+
+      // 태그 추가
+      if (tags.length > 0) {
+        submitData.append('tags', JSON.stringify(tags));
+      }
 
       // 미디어 파일 추가
       mediaFiles.forEach((mediaFile, index) => {
@@ -483,34 +791,65 @@ export default function SellPage() {
               { step: 2, title: "경매 설정" },
               { step: 3, title: "배송 정보" },
               { step: 4, title: "미디어" },
-            ].map(({ step, title }) => (
-              <div key={step} className="flex items-center">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep >= step
-                    ? "bg-green-600 text-white"
-                    : "bg-gray-200 text-black"
-                    }`}
-                >
-                  {step}
-                </div>
-                <span
-                  className={`ml-2 text-sm font-medium ${currentStep >= step ? "text-green-600" : "text-black"
-                    }`}
-                >
-                  {title}
-                </span>
-                {step < 4 && (
-                  <div
-                    className={`w-16 h-0.5 mx-4 ${currentStep > step ? "bg-green-600" : "bg-gray-200"
+            ].map(({ step, title }) => {
+              const isCompleted = validateStep(step);
+              const isCurrent = currentStep === step;
+              const isPassed = currentStep > step;
+              
+              return (
+                <div key={step} className="flex items-center">
+                  <div className="flex flex-col items-center">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium relative ${
+                        isPassed
+                          ? "bg-green-600 text-white"
+                          : isCurrent
+                          ? isCompleted
+                            ? "bg-green-600 text-white"
+                            : "bg-blue-500 text-white"
+                          : "bg-gray-200 text-black"
                       }`}
-                  />
-                )}
-              </div>
-            ))}
+                    >
+                      {isPassed || (isCurrent && isCompleted) ? "✓" : step}
+                      {isCurrent && !isCompleted && (
+                        <div className="absolute -inset-1 rounded-full border-2 border-blue-300 animate-pulse"></div>
+                      )}
+                    </div>
+                    <span
+                      className={`mt-1 text-xs font-medium ${
+                        isPassed || (isCurrent && isCompleted)
+                          ? "text-green-600"
+                          : isCurrent
+                          ? "text-blue-600"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {title}
+                    </span>
+                    {/* Progress percentage */}
+                    {isCurrent && (
+                      <div className="mt-1 text-xs text-gray-500">
+                        {isCompleted ? "완료" : "진행중"}
+                      </div>
+                    )}
+                  </div>
+                  {step < 4 && (
+                    <div
+                      className={`w-16 h-0.5 mx-4 ${
+                        isPassed ? "bg-green-600" : "bg-gray-200"
+                      }`}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Form */}
+          <div className="lg:col-span-2">
+            <form onSubmit={handleSubmit} className="space-y-8">
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-md p-4">
               <div className="flex">
@@ -696,6 +1035,73 @@ export default function SellPage() {
                   placeholder="이전 관리 방법, 시기 등을 설명해주세요"
                 />
               </div>
+
+              {/* Tags Section */}
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">
+                  검색 태그 (최대 10개)
+                </label>
+                <div className="space-y-2">
+                  {/* Existing Tags */}
+                  {tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800"
+                        >
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => removeTag(tag)}
+                            className="ml-2 text-green-600 hover:text-green-800"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Tag Input */}
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={handleTagInputKeyDown}
+                      placeholder="태그를 입력하고 Enter 또는 쉼표를 누르세요"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
+                      disabled={tags.length >= 10}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => addTag(tagInput)}
+                      disabled={!tagInput.trim() || tags.length >= 10}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    >
+                      추가
+                    </button>
+                  </div>
+                  
+                  {/* Suggested Tags */}
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-sm text-gray-500">추천 태그:</span>
+                    {["실내분재", "야외분재", "초보자용", "고급자용", "희귀품종", "화분포함"].map((suggestedTag) => (
+                      !tags.includes(suggestedTag) && tags.length < 10 && (
+                        <button
+                          key={suggestedTag}
+                          type="button"
+                          onClick={() => addTag(suggestedTag)}
+                          className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border"
+                        >
+                          + {suggestedTag}
+                        </button>
+                      )
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -705,6 +1111,38 @@ export default function SellPage() {
               <h2 className="text-xl font-semibold text-black mb-4">
                 경매 설정
               </h2>
+
+              {/* 수종별 가격 가이드 */}
+              {formData.species && (
+                <div className="bg-green-50 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-green-900 mb-2">💰 {formData.species} 가격 가이드</h4>
+                  {(() => {
+                    const guide = getPriceGuide(formData.species);
+                    return (
+                      <div className="text-sm text-green-800">
+                        <p className="mb-1">{guide.description}</p>
+                        <p className="font-medium">권장 가격대: {guide.min.toLocaleString()}원 ~ {guide.max.toLocaleString()}원</p>
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            type="button"
+                            onClick={() => handleQuickPrice('startPrice', guide.min)}
+                            className="px-2 py-1 text-xs bg-green-200 hover:bg-green-300 text-green-800 rounded"
+                          >
+                            최소가 적용
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleQuickPrice('startPrice', Math.floor((guide.min + guide.max) / 2))}
+                            className="px-2 py-1 text-xs bg-green-200 hover:bg-green-300 text-green-800 rounded"
+                          >
+                            평균가 적용
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -850,6 +1288,31 @@ export default function SellPage() {
                 </div>
               </div>
 
+              {/* 경매 일정 추천 */}
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-blue-900 mb-3">🕒 추천 경매 일정</h4>
+                <div className="space-y-2">
+                  {getOptimalAuctionTimes().map((recommendation, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
+                      <div className="flex-1">
+                        <div className="font-medium text-sm text-black">{recommendation.label}</div>
+                        <div className="text-xs text-gray-500">{recommendation.reason}</div>
+                        <div className="text-xs text-gray-600 mt-1">
+                          {recommendation.start.toLocaleDateString('ko-KR')} {recommendation.start.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} ~ {recommendation.end.toLocaleDateString('ko-KR')} {recommendation.end.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => applyRecommendedTime(recommendation.start, recommendation.end)}
+                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                      >
+                        적용
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-black mb-2">
                   자동연장 시간 (분)
@@ -885,7 +1348,7 @@ export default function SellPage() {
                   required
                   ref={shippingMethodRef}
                   value={formData.shippingMethod}
-                  onChange={handleInputChange}
+                  onChange={handleShippingMethodChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                 >
                   {shippingMethodOptions.map((option) => (
@@ -898,6 +1361,48 @@ export default function SellPage() {
                     </option>
                   ))}
                 </select>
+                
+                {/* 배송비 표시 */}
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">예상 배송비</span>
+                    <span className="font-semibold text-green-600">
+                      {shippingCost.toLocaleString()}원
+                    </span>
+                  </div>
+                  {formData.shippingMethod !== "DIRECT_PICKUP" && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      * 분재 높이 ({formData.heightCm || "미입력"}cm) 기준으로 계산됨
+                    </p>
+                  )}
+                  
+                  {/* 배송비 상세 정보 */}
+                  <div className="mt-2 text-xs text-gray-500">
+                    <div className="grid grid-cols-2 gap-2">
+                      {formData.shippingMethod === "COURIER" && (
+                        <>
+                          <div>30cm 이하: 3,000원</div>
+                          <div>60cm 이하: 5,000원</div>
+                          <div>60cm 초과: 8,000원</div>
+                        </>
+                      )}
+                      {formData.shippingMethod === "QUICK" && (
+                        <>
+                          <div>30cm 이하: 8,000원</div>
+                          <div>60cm 이하: 12,000원</div>
+                          <div>60cm 초과: 15,000원</div>
+                        </>
+                      )}
+                      {formData.shippingMethod === "FREIGHT" && (
+                        <>
+                          <div>100cm 이하: 15,000원</div>
+                          <div>150cm 이하: 25,000원</div>
+                          <div>150cm 초과: 35,000원</div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -981,9 +1486,27 @@ export default function SellPage() {
 
               {mediaFiles.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {mediaFiles.map((mediaFile) => (
-                    <div key={mediaFile.id} className="relative group">
-                      <div className="aspect-square relative bg-gray-100 rounded-lg overflow-hidden">
+                  {mediaFiles.map((mediaFile, index) => (
+                    <div 
+                      key={mediaFile.id} 
+                      className="relative group cursor-move"
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData("dragIndex", index.toString());
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        const dragIndex = parseInt(e.dataTransfer.getData("dragIndex"));
+                        const dropIndex = index;
+                        if (dragIndex !== dropIndex) {
+                          moveMediaFile(dragIndex, dropIndex);
+                        }
+                      }}
+                    >
+                      <div className="aspect-square relative bg-gray-100 rounded-lg overflow-hidden border-2 border-transparent hover:border-blue-300 transition-colors">
                         {mediaFile.type === "IMAGE" ? (
                           <img
                             src={mediaFile.preview}
@@ -997,24 +1520,40 @@ export default function SellPage() {
                             controls
                           />
                         )}
-                        <div className="absolute top-2 left-2">
+                        <div className="absolute top-2 left-2 flex items-center space-x-1">
                           {mediaFile.type === "IMAGE" ? (
                             <Camera className="h-4 w-4 text-white" />
                           ) : (
                             <Video className="h-4 w-4 text-white" />
                           )}
+                          <span className="text-white text-xs bg-black bg-opacity-50 px-1 rounded">
+                            {index + 1}
+                          </span>
+                        </div>
+                        {/* Drag indicator */}
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="bg-black bg-opacity-50 text-white p-1 rounded text-xs">
+                            ⋮⋮
+                          </div>
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => removeMediaFile(mediaFile.id)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                       >
                         <X className="h-4 w-4" />
                       </button>
                     </div>
                   ))}
                 </div>
+              )}
+
+              {/* Help Text for Drag & Drop */}
+              {mediaFiles.length > 1 && (
+                <p className="text-sm text-gray-500 mt-2 text-center">
+                  이미지를 드래그해서 순서를 변경할 수 있습니다
+                </p>
               )}
             </div>
           )}
@@ -1050,6 +1589,111 @@ export default function SellPage() {
             )}
           </div>
         </form>
+          </div>
+
+          {/* Real-time Preview */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-8">
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-black mb-4">미리보기</h3>
+                
+                {/* Preview Card */}
+                <div className="border rounded-lg overflow-hidden">
+                  {/* Image Preview */}
+                  <div className="aspect-square bg-gray-100 relative">
+                    {mediaFiles.length > 0 ? (
+                      <img
+                        src={mediaFiles[0].preview}
+                        alt="미리보기"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-400">
+                        <Camera className="h-12 w-12" />
+                      </div>
+                    )}
+                    {mediaFiles.length > 1 && (
+                      <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                        +{mediaFiles.length - 1}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content Preview */}
+                  <div className="p-4">
+                    <h4 className="font-semibold text-black mb-2">
+                      {formData.title || "상품명을 입력하세요"}
+                    </h4>
+                    
+                    {formData.species && (
+                      <p className="text-sm text-gray-600 mb-2">
+                        {formData.species} • {formData.style || "수형 미지정"}
+                      </p>
+                    )}
+
+                    {(formData.heightCm || formData.ageYearsEst) && (
+                      <p className="text-xs text-gray-500 mb-3">
+                        {formData.heightCm && `높이: ${formData.heightCm}cm`}
+                        {formData.heightCm && formData.ageYearsEst && " • "}
+                        {formData.ageYearsEst && `수령: ${formData.ageYearsEst}년`}
+                      </p>
+                    )}
+
+                    {formData.startPrice && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">시작가</span>
+                          <span className="font-semibold text-green-600">
+                            {formData.startPrice}원
+                          </span>
+                        </div>
+                        
+                        {formData.buyNowPrice && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">즉시구매</span>
+                            <span className="text-sm text-blue-600">
+                              {formData.buyNowPrice}원
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {formData.endsAt && (
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="text-xs text-gray-500">
+                          경매 종료: {new Date(formData.endsAt).toLocaleDateString('ko-KR')} {new Date(formData.endsAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Progress Summary */}
+                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                  <div className="text-sm text-gray-600 mb-2">작성 진행도</div>
+                  <div className="space-y-1">
+                    {[
+                      { step: 1, name: "기본정보", completed: validateStep(1) },
+                      { step: 2, name: "경매설정", completed: validateStep(2) },
+                      { step: 3, name: "배송정보", completed: validateStep(3) },
+                      { step: 4, name: "미디어", completed: validateStep(4) },
+                    ].map(({ step, name, completed }) => (
+                      <div key={step} className="flex items-center justify-between text-xs">
+                        <span className={completed ? "text-green-600" : "text-gray-500"}>
+                          {name}
+                        </span>
+                        <span className={completed ? "text-green-600" : "text-gray-400"}>
+                          {completed ? "✓" : "○"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
