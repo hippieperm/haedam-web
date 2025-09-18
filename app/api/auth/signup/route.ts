@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Sign up with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
@@ -50,12 +50,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user profile in users table using admin client to bypass RLS
-    const adminSupabase = createAdminClient()
-    
+    const adminSupabase = await createAdminClient()
+
     // Check if this is the admin email and set role accordingly
     const isAdmin = body.email === process.env.ADMIN_EMAIL
     const userRole = isAdmin ? 'ADMIN' : 'USER'
-    
+
     const { error: profileError } = await adminSupabase
       .from('users')
       .insert({
