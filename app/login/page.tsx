@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/contexts/auth-context";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -17,6 +17,14 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // 사용자가 로그인되면 홈페이지로 리다이렉트
+  useEffect(() => {
+    if (user) {
+      console.log("사용자가 로그인됨, 홈페이지로 리다이렉트 중...");
+      router.push("/");
+    }
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,13 +43,10 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.success) {
-        // 로그인 성공 시 사용자 정보를 컨텍스트에 저장하고 홈페이지로 리다이렉트
+        // 로그인 성공 시 사용자 정보를 컨텍스트에 저장
         console.log("로그인 성공! 사용자 정보:", data.user);
         login(data.user);
-
-        // 홈페이지로 강제 리다이렉트
-        console.log("홈페이지로 리다이렉트 중...");
-        window.location.href = "/";
+        // useEffect가 자동으로 홈페이지로 리다이렉트함
       } else {
         console.log("로그인 실패:", data.error || data.message);
         setError(data.error || data.message || "로그인에 실패했습니다.");
