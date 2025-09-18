@@ -1,31 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { signupSchema } from '@/lib/validations/auth'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    // Validate input
-    const validatedData = signupSchema.parse(body)
+    // 기본 유효성 검사
+    if (!body.email || !body.password || !body.name || !body.nickname) {
+      return NextResponse.json(
+        { error: '필수 정보를 모두 입력해주세요' },
+        { status: 400 }
+      )
+    }
 
     const supabase = createClient()
 
     // Sign up with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
-      email: validatedData.email,
-      password: validatedData.password,
+      email: body.email,
+      password: body.password,
       options: {
         data: {
-          name: validatedData.name,
-          nickname: validatedData.nickname,
-          phone: validatedData.phone,
+          name: body.name,
+          nickname: body.nickname,
+          phone: body.phone || '',
         }
       }
     })
 
     if (error) {
-      if (error.message.includes('already registered')) {
+      console.error('Supabase signup error:', error)
+      if (error.message.includes('already registered') || error.message.includes('already been registered')) {
         return NextResponse.json(
           { error: '이미 등록된 이메일입니다' },
           { status: 400 }
@@ -44,25 +49,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // The user profile will be automatically created by the trigger function
     // Return the user data
     return NextResponse.json({
+      success: true,
       user: {
         id: data.user.id,
         email: data.user.email,
-        name: validatedData.name,
-        nickname: validatedData.nickname,
+        name: body.name,
+        nickname: body.nickname,
         role: 'USER',
       },
       message: '회원가입이 완료되었습니다. 이메일을 확인해주세요.'
     })
   } catch (error) {
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      )
-    }
+    console.error('Signup API error:', error)
     return NextResponse.json(
       { error: '회원가입 중 오류가 발생했습니다' },
       { status: 500 }

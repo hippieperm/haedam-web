@@ -76,7 +76,7 @@ export default function SignupPage() {
           router.push("/login");
         }, 2000);
       } else {
-        setError(data.message || "회원가입에 실패했습니다.");
+        setError(data.error || data.message || "회원가입에 실패했습니다.");
       }
     } catch (error) {
       console.error("Signup error:", error);
@@ -179,8 +179,8 @@ export default function SignupPage() {
                     value={formData.email}
                     onChange={handleInputChange}
                     className={`appearance-none block w-full pl-10 pr-3 py-2 border rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${formData.email && !isEmailValid
-                        ? "border-red-300"
-                        : "border-gray-300"
+                      ? "border-red-300"
+                      : "border-gray-300"
                       }`}
                     placeholder="이메일을 입력하세요"
                   />
@@ -286,8 +286,8 @@ export default function SignupPage() {
                     value={formData.password}
                     onChange={handleInputChange}
                     className={`appearance-none block w-full pl-10 pr-10 py-2 border rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${formData.password && !isPasswordValid
-                        ? "border-red-300"
-                        : "border-gray-300"
+                      ? "border-red-300"
+                      : "border-gray-300"
                       }`}
                     placeholder="비밀번호를 입력하세요"
                   />
@@ -330,9 +330,9 @@ export default function SignupPage() {
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     className={`appearance-none block w-full pl-10 pr-10 py-2 border rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${formData.confirmPassword &&
-                        formData.password !== formData.confirmPassword
-                        ? "border-red-300"
-                        : "border-gray-300"
+                      formData.password !== formData.confirmPassword
+                      ? "border-red-300"
+                      : "border-gray-300"
                       }`}
                     placeholder="비밀번호를 다시 입력하세요"
                   />
