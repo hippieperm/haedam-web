@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const offset = (page - 1) * limit;
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Build query
     let query = supabase
@@ -109,10 +109,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 관리자 권한 확인
-    if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+    // 사용자 역할 확인 (일반 사용자도 상품 등록 가능)
+    if (!user.role || user.role === 'GUEST') {
       return NextResponse.json(
-        { success: false, message: "상품 등록 권한이 없습니다. 관리자만 상품을 등록할 수 있습니다." },
+        { success: false, message: "상품 등록 권한이 없습니다. 로그인이 필요합니다." },
         { status: 403 }
       );
     }
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     // FormData 처리
     const formData = await request.formData();
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // 기본 상품 정보
     const itemData = {
