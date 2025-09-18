@@ -664,6 +664,13 @@ export default function SellPage() {
     setLoading(true);
     setError("");
 
+    // 이미지 업로드 필수 체크
+    if (mediaFiles.length === 0) {
+      setError("최소 1장의 이미지를 업로드해야 합니다.");
+      setLoading(false);
+      return;
+    }
+
     try {
       // 중복 상품 체크
       const canProceed = await checkDuplicateProduct();

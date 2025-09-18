@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         bids(*),
         watchlists(*)
       `)
-      .eq('status', status)
+.eq('status', status)
       .is('deleted_at', null);
 
     // Apply filters

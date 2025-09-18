@@ -12,37 +12,46 @@ import {
   Users,
 } from "lucide-react";
 import { useAuth } from "@/lib/contexts/auth-context";
+import { useState, useEffect } from "react";
 
-// This would come from an API call
-const featuredItems = [
-  {
-    id: "1",
-    title: "50년생 흑송 문인목",
-    species: "흑송",
-    currentPrice: 550000,
-    buyNowPrice: 2000000,
-    endsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "LIVE",
-    coverImageUrl: "https://via.placeholder.com/400x400",
-    _count: { bids: 12, watchlists: 24 },
-    seller: { nickname: "분재명인" },
-  },
-  {
-    id: "2",
-    title: "진백 소품분 15년생",
-    species: "진백",
-    currentPrice: 150000,
-    buyNowPrice: 500000,
-    endsAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "LIVE",
-    coverImageUrl: "https://via.placeholder.com/400x400",
-    _count: { bids: 5, watchlists: 8 },
-    seller: { nickname: "초보자용" },
-  },
-];
+interface Item {
+  id: string;
+  title: string;
+  species: string;
+  current_price: number;
+  buy_now_price?: number;
+  ends_at: string;
+  status: string;
+  seller: { nickname: string };
+  media: { url: string }[];
+  bids: any[];
+  watchlists: any[];
+}
 
 export default function HomePage() {
   const { user } = useAuth();
+  const [items, setItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Supabase에서 상품 데이터 가져오기
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await fetch('/api/items?status=LIVE&limit=4&sort=newest');
+        const data = await response.json();
+        
+        if (data.success) {
+          setItems(data.data.items || []);
+        }
+      } catch (error) {
+        console.error('상품 데이터 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItems();
+  }, []);
 
   return (
     <div>
@@ -162,9 +171,52 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredItems.map((item) => (
-              <ItemCard key={item.id} item={item} />
-            ))}
+            {loading ? (
+              // 로딩 스켈레톤
+              [...Array(4)].map((_, index) => (
+                <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
+                  <div className="w-full h-48 bg-gray-200"></div>
+                  <div className="p-4">
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-6 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+              ))
+            ) : items.length > 0 ? (
+              items.map((item) => (
+                <ItemCard 
+                  key={item.id} 
+                  item={{
+                    id: item.id,
+                    title: item.title,
+                    species: item.species,
+                    currentPrice: item.current_price,
+                    buyNowPrice: item.buy_now_price,
+                    endsAt: item.ends_at,
+                    status: item.status,
+                    coverImageUrl: item.media?.[0]?.url || "https://via.placeholder.com/400x400",
+                    _count: { 
+                      bids: item.bids?.length || 0, 
+                      watchlists: item.watchlists?.length || 0 
+                    },
+                    seller: { nickname: item.seller?.nickname || "익명" },
+                  }} 
+                />
+              ))
+            ) : (
+              // 등록된 상품이 없을 때
+              <div className="col-span-full text-center py-12">
+                <div className="text-gray-500 mb-4">
+                  <Gavel className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-medium mb-2">아직 등록된 경매가 없습니다</h3>
+                  <p className="text-sm">첫 번째 분재를 등록해보세요!</p>
+                </div>
+                <Button asChild className="mt-4">
+                  <Link href="/sell">상품 등록하기</Link>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </section>
