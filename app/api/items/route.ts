@@ -206,53 +206,54 @@ export async function POST(request: NextRequest) {
 
     console.log('Item created successfully:', item);
 
-    // 미디어 파일 처리 (인증된 클라이언트 사용)
-    // 서비스 롤 키가 없으므로 인증된 클라이언트 사용
-    const storageSupabase = await createClient();
+    // 미디어 파일 처리 (base64 방식)
     const mediaFiles = [];
     let mediaIndex = 0;
 
-    while (formData.has(`media_${mediaIndex}`)) {
-      const file = formData.get(`media_${mediaIndex}`) as File;
+    while (formData.has(`media_${mediaIndex}_base64`)) {
+      const base64Data = formData.get(`media_${mediaIndex}_base64`) as string;
+      const fileName = formData.get(`media_${mediaIndex}_name`) as string;
       const mediaType = formData.get(`media_type_${mediaIndex}`) as string;
 
-      if (file && file.size > 0) {
-        console.log(`Processing media file ${mediaIndex}:`, file.name, 'Size:', file.size);
+      if (base64Data && fileName) {
+        console.log(`Processing media file ${mediaIndex}:`, fileName);
         
         try {
-          // Supabase Storage에 파일 업로드 (관리자 클라이언트 사용)
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${item.id}_${mediaIndex}.${fileExt}`;
-          const filePath = `items/${item.id}/${fileName}`;
+          // base64에서 실제 파일 데이터 추출
+          const base64Content = base64Data.split(',')[1]; // "data:image/jpeg;base64," 부분 제거
+          const buffer = Buffer.from(base64Content, 'base64');
+          
+          const fileExt = fileName.split('.').pop();
+          const newFileName = `${item.id}_${mediaIndex}.${fileExt}`;
+          const filePath = `items/${item.id}/${newFileName}`;
 
-          const { data: uploadData, error: uploadError } = await storageSupabase.storage
-            .from('item-media')
-            .upload(filePath, file, {
-              cacheControl: '3600',
-              upsert: false
-            });
-
-          if (uploadError) {
-            console.error('Upload error:', uploadError);
-            console.error('Upload error details:', JSON.stringify(uploadError, null, 2));
-            continue;
+          // 임시로 public 폴더에 저장 (개발용)
+          // 실제 운영에서는 Supabase Storage나 다른 클라우드 스토리지 사용 권장
+          const fs = require('fs');
+          const path = require('path');
+          
+          const publicDir = path.join(process.cwd(), 'public', 'uploads', 'items', item.id);
+          
+          // 디렉토리가 없으면 생성
+          if (!fs.existsSync(publicDir)) {
+            fs.mkdirSync(publicDir, { recursive: true });
           }
-
-          console.log('Upload successful:', uploadData);
-
-          // Public URL 생성
-          const { data: urlData } = storageSupabase.storage
-            .from('item-media')
-            .getPublicUrl(filePath);
+          
+          const fullPath = path.join(publicDir, newFileName);
+          fs.writeFileSync(fullPath, buffer);
+          
+          const publicUrl = `/uploads/items/${item.id}/${newFileName}`;
 
           mediaFiles.push({
             item_id: item.id,
-            url: urlData.publicUrl,
+            url: publicUrl,
             type: mediaType,
             sort: mediaIndex,
-            file_name: fileName,
-            file_size: file.size,
+            file_name: newFileName,
+            file_size: buffer.length,
           });
+          
+          console.log(`Media file saved: ${publicUrl}`);
         } catch (fileError) {
           console.error(`Error processing file ${mediaIndex}:`, fileError);
         }

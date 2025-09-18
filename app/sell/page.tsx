@@ -519,6 +519,16 @@ export default function SellPage() {
     }));
   };
 
+  // 파일을 base64로 변환하는 함수
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   // 수종별 가격 가이드
   const getPriceGuide = (species: string) => {
     const guides: { [key: string]: { min: number; max: number; description: string } } = {
@@ -684,11 +694,18 @@ export default function SellPage() {
         submitData.append('tags', JSON.stringify(tags));
       }
 
-      // 미디어 파일 추가
-      mediaFiles.forEach((mediaFile, index) => {
-        submitData.append(`media_${index}`, mediaFile.file);
-        submitData.append(`media_type_${index}`, mediaFile.type);
-      });
+      // 미디어 파일을 base64로 변환하여 추가
+      for (let index = 0; index < mediaFiles.length; index++) {
+        const mediaFile = mediaFiles[index];
+        try {
+          const base64 = await fileToBase64(mediaFile.file);
+          submitData.append(`media_${index}_base64`, base64);
+          submitData.append(`media_${index}_name`, mediaFile.file.name);
+          submitData.append(`media_type_${index}`, mediaFile.type);
+        } catch (error) {
+          console.error(`미디어 파일 ${index} 처리 중 오류:`, error);
+        }
+      }
 
       const response = await fetch("/api/items", {
         method: "POST",
