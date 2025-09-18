@@ -49,6 +49,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Create user profile in users table
+    const { error: profileError } = await supabase
+      .from('users')
+      .insert({
+        id: data.user.id,
+        email: data.user.email,
+        name: body.name,
+        nickname: body.nickname,
+        phone: body.phone || '',
+        role: 'USER',
+        is_verified: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+    if (profileError) {
+      console.error('Profile creation error:', profileError)
+      // Don't fail the signup if profile creation fails, just log it
+    }
+
     // Return the user data
     return NextResponse.json({
       success: true,

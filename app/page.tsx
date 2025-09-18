@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ItemCard } from "@/components/item-card";
@@ -9,6 +11,7 @@ import {
   Clock,
   Users,
 } from "lucide-react";
+import { useAuth } from "@/lib/contexts/auth-context";
 
 // This would come from an API call
 const featuredItems = [
@@ -39,12 +42,22 @@ const featuredItems = [
 ];
 
 export default function HomePage() {
+  const { user } = useAuth();
+
   return (
     <div>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-green-50 to-green-100 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
+            {user && (
+              <div className="mb-6 p-4 bg-green-100 rounded-lg inline-block">
+                <p className="text-lg text-green-800">
+                  안녕하세요, <span className="font-bold">{user.nickname}</span>님!
+                  분재경매에 오신 것을 환영합니다! 🎉
+                </p>
+              </div>
+            )}
             <h1 className="text-4xl md:text-6xl font-bold text-black mb-6">
               전국 최대 규모
               <span className="text-green-600 block">분재 경매 플랫폼</span>

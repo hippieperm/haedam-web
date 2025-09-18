@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, X, User, ShoppingCart, Heart } from "lucide-react";
+import { Search, Menu, X, User, ShoppingCart, Heart, LogOut } from "lucide-react";
+import { useAuth } from "@/lib/contexts/auth-context";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <header className="bg-white shadow-sm border-b">
@@ -52,12 +54,30 @@ export function Header() {
 
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" asChild className="text-black">
-              <Link href="/login">로그인</Link>
-            </Button>
-            <Button asChild className="text-black">
-              <Link href="/signup">회원가입</Link>
-            </Button>
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-700">
+                  안녕하세요, {user.nickname}님!
+                </span>
+                <Button
+                  variant="ghost"
+                  onClick={logout}
+                  className="text-black hover:text-red-600"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  로그아웃
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Button variant="ghost" asChild className="text-black">
+                  <Link href="/login">로그인</Link>
+                </Button>
+                <Button asChild className="text-black">
+                  <Link href="/signup">회원가입</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -113,20 +133,41 @@ export function Header() {
               </Link>
               <div className="pt-4 border-t border-gray-200">
                 <div className="space-y-2">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-black"
-                    asChild
-                  >
-                    <Link href="/login" onClick={() => setIsMenuOpen(false)}>
-                      로그인
-                    </Link>
-                  </Button>
-                  <Button className="w-full text-black" asChild>
-                    <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
-                      회원가입
-                    </Link>
-                  </Button>
+                  {user ? (
+                    <>
+                      <div className="px-3 py-2 text-sm text-gray-700">
+                        안녕하세요, {user.nickname}님!
+                      </div>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-black hover:text-red-600"
+                        onClick={() => {
+                          logout();
+                          setIsMenuOpen(false);
+                        }}
+                      >
+                        <LogOut className="h-4 w-4 mr-2" />
+                        로그아웃
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-black"
+                        asChild
+                      >
+                        <Link href="/login" onClick={() => setIsMenuOpen(false)}>
+                          로그인
+                        </Link>
+                      </Button>
+                      <Button className="w-full text-black" asChild>
+                        <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
+                          회원가입
+                        </Link>
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

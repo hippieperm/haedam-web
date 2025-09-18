@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from "lucide-react";
+import { useAuth } from "@/lib/contexts/auth-context";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -33,10 +35,15 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.success) {
-        // 로그인 성공 시 홈페이지로 리다이렉트
-        router.push("/");
-        router.refresh();
+        // 로그인 성공 시 사용자 정보를 컨텍스트에 저장하고 홈페이지로 리다이렉트
+        console.log("로그인 성공! 사용자 정보:", data.user);
+        login(data.user);
+
+        // 홈페이지로 강제 리다이렉트
+        console.log("홈페이지로 리다이렉트 중...");
+        window.location.href = "/";
       } else {
+        console.log("로그인 실패:", data.error || data.message);
         setError(data.error || data.message || "로그인에 실패했습니다.");
       }
     } catch (error) {
