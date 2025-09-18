@@ -1,103 +1,88 @@
-import { SignJWT, jwtVerify } from "jose";
-import { cookies } from "next/headers";
-import { UserRole } from "@prisma/client";
-import bcrypt from "bcryptjs";
-import { prisma } from "./prisma";
+import { createClient } from './supabase/server'
+import { User } from '@supabase/supabase-js'
 
-const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET || "change_this_to_a_secure_secret_key_in_production"
-);
+export type UserRole = 'USER' | 'SELLER' | 'ADMIN' | 'SUPER_ADMIN'
 
-export interface JWTPayload {
-  userId: string;
-  email: string;
-  role: UserRole;
-  exp?: number;
+export interface UserProfile {
+  id: string
+  email: string
+  role: UserRole
+  name?: string
+  nickname?: string
+  phone?: string
+  profile_image?: string
+  is_verified: boolean
+  created_at: string
+  updated_at: string
 }
 
-export async function signJWT(payload: JWTPayload): Promise<string> {
-  return await new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("7d")
-    .sign(secret);
-}
-
-export async function verifyJWT(token: string): Promise<JWTPayload | null> {
+export async function getCurrentUser(): Promise<UserProfile | null> {
   try {
-    const { payload } = await jwtVerify(token, secret);
-    return payload as JWTPayload;
-  } catch {
-    return null;
-  }
-}
+    const supabase = createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-export async function getSession(): Promise<JWTPayload | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token");
-  if (!token) return null;
-  return verifyJWT(token.value);
-}
+    if (authError || !user) {
+      return null
+    }
 
-export async function setSession(payload: JWTPayload): Promise<void> {
-  const token = await signJWT(payload);
-  const cookieStore = await cookies();
-  cookieStore.set("token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-    path: "/",
-  });
-}
+    const { data: profile, error: profileError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', user.id)
+      .single()
 
-export async function clearSession(): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.delete("token");
-}
+    if (profileError || !profile) {
+      return null
+    }
 
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10);
-}
-
-export async function verifyPassword(
-  password: string,
-  hash: string
-): Promise<boolean> {
-  return bcrypt.compare(password, hash);
-}
-
-export async function getCurrentUser() {
-  const session = await getSession();
-  if (!session) return null;
-
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: session.userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        nickname: true,
-        role: true,
-        profileImage: true,
-        phone: true,
-        createdAt: true,
-      },
-    });
-    return user;
+    return profile
   } catch (error) {
-    console.error("Error fetching current user:", error);
-    return null;
+    console.error('Error fetching current user:', error)
+    return null
   }
 }
 
-export async function requireAdmin() {
-  const user = await getCurrentUser();
+export async function getCurrentAuthUser(): Promise<User | null> {
+  try {
+    const supabase = createClient()
+    const { data: { user }, error } = await supabase.auth.getUser()
+
+    if (error || !user) {
+      return null
+    }
+
+    return user
+  } catch (error) {
+    console.error('Error fetching auth user:', error)
+    return null
+  }
+}
+
+export async function requireAuth(): Promise<UserProfile> {
+  const user = await getCurrentUser()
   if (!user) {
-    throw new Error("인증이 필요합니다.");
+    throw new Error('인증이 필요합니다.')
   }
-  if (user.role !== "ADMIN") {
-    throw new Error("관리자 권한이 필요합니다.");
+  return user
+}
+
+export async function requireAdmin(): Promise<UserProfile> {
+  const user = await requireAuth()
+  if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+    throw new Error('관리자 권한이 필요합니다.')
   }
-  return user;
+  return user
+}
+
+export async function requireSeller(): Promise<UserProfile> {
+  const user = await requireAuth()
+  if (user.role !== 'SELLER' && user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+    throw new Error('판매자 권한이 필요합니다.')
+  }
+  return user
+}
+
+export async function signOut() {
+  const supabase = createClient()
+  await supabase.auth.signOut()
 }

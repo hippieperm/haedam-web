@@ -55,10 +55,10 @@
 
 ### Backend
 - **Next.js API Routes** - 서버리스 API
-- **Prisma** - ORM
-- **PostgreSQL** - 데이터베이스
-- **JWT (jose)** - 인증
-- **bcryptjs** - 비밀번호 해싱
+- **Supabase** - 백엔드 서비스 (데이터베이스, 인증, 스토리지)
+- **PostgreSQL** - 데이터베이스 (Supabase 관리)
+- **Supabase Auth** - 인증 시스템
+- **Supabase Storage** - 파일 스토리지
 
 ### DevOps & Tools
 - **Docker** - 컨테이너화
@@ -69,7 +69,7 @@
 
 ### 필수 요구사항
 - Node.js 18+
-- PostgreSQL 12+
+- Supabase 계정
 - npm 또는 yarn
 
 ### 1. 프로젝트 클론
@@ -83,32 +83,32 @@ cd bonsai-auction
 npm install
 ```
 
-### 3. 환경 변수 설정
-`.env.example`을 복사하여 `.env.local` 파일을 생성하고 필요한 값들을 설정하세요.
+### 3. Supabase 프로젝트 설정
+1. [Supabase](https://supabase.com)에서 새 프로젝트 생성
+2. 프로젝트 설정에서 API 키 확인
+3. SQL Editor에서 `supabase/schema.sql` 파일 실행
+
+### 4. 환경 변수 설정
+`.env.example`을 복사하여 `.env.local` 파일을 생성하고 Supabase 정보를 설정하세요.
 
 ```bash
 cp .env.example .env.local
 ```
 
 주요 환경 변수:
-- `DATABASE_URL`: PostgreSQL 연결 문자열
-- `JWT_SECRET`: JWT 서명용 시크릿
-- `ADMIN_USERNAME`: 관리자 아이디
+- `NEXT_PUBLIC_SUPABASE_URL`: Supabase 프로젝트 URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase 익명 키
+- `SUPABASE_SERVICE_ROLE_KEY`: Supabase 서비스 역할 키
+- `ADMIN_EMAIL`: 관리자 이메일
 - `ADMIN_PASSWORD`: 관리자 비밀번호
 
-### 4. 데이터베이스 설정
-```bash
-# Prisma 클라이언트 생성
-npm run prisma:generate
+### 5. Supabase Storage 버킷 생성
+Supabase 대시보드에서 다음 버킷들을 생성하세요:
+- `item-media`: 상품 이미지/동영상
+- `profile-images`: 프로필 이미지
+- `temp-uploads`: 임시 업로드 파일
 
-# 데이터베이스 마이그레이션
-npm run prisma:migrate
-
-# 시드 데이터 생성
-npm run prisma:seed
-```
-
-### 5. 개발 서버 실행
+### 6. 개발 서버 실행
 ```bash
 npm run dev
 ```
@@ -129,14 +129,13 @@ bonsai-auction/
 │   └── footer.tsx        # 푸터 컴포넌트
 ├── lib/                  # 유틸리티 및 설정
 │   ├── auth.ts          # 인증 로직
-│   ├── prisma.ts        # Prisma 클라이언트
+│   ├── supabase/        # Supabase 클라이언트
 │   ├── utils.ts         # 공통 유틸리티
 │   ├── middleware/      # 미들웨어
 │   ├── services/        # 비즈니스 로직
 │   └── validations/     # 스키마 검증
-├── prisma/              # Prisma 설정
-│   ├── schema.prisma    # 데이터베이스 스키마
-│   └── seed.ts          # 시드 데이터
+├── supabase/            # Supabase 설정
+│   └── schema.sql       # 데이터베이스 스키마
 └── public/              # 정적 파일
 ```
 
@@ -150,12 +149,12 @@ bonsai-auction/
 - **notifications**: 알림
 - **audit_logs**: 감사 로그
 
-자세한 스키마는 `prisma/schema.prisma` 파일을 참고하세요.
+자세한 스키마는 `supabase/schema.sql` 파일을 참고하세요.
 
 ## 🔐 보안 고려사항
 
-- JWT 토큰 기반 인증
-- 비밀번호 해싱 (bcrypt)
+- Supabase Auth 기반 인증
+- Row Level Security (RLS) 적용
 - 입력값 검증 (Zod)
 - CSRF 보호
 - 레이트 리미팅

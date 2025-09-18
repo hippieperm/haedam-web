@@ -1,52 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSession } from '@/lib/auth'
-import { UserRole } from '@prisma/client'
+import { getCurrentUser, UserRole } from '@/lib/auth'
 
 export async function requireAuth(request: NextRequest) {
-  const session = await getSession()
+  const user = await getCurrentUser()
 
-  if (!session) {
+  if (!user) {
     return NextResponse.json(
       { error: '인증이 필요합니다' },
       { status: 401 }
     )
   }
 
-  return session
+  return user
 }
 
 export async function requireAdmin(request: NextRequest) {
-  const session = await requireAuth(request)
+  const user = await requireAuth(request)
 
-  if (session instanceof NextResponse) {
-    return session
+  if (user instanceof NextResponse) {
+    return user
   }
 
-  if (session.role !== UserRole.ADMIN && session.role !== UserRole.SUPER_ADMIN) {
+  if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
     return NextResponse.json(
       { error: '관리자 권한이 필요합니다' },
       { status: 403 }
     )
   }
 
-  return session
+  return user
 }
 
 export async function requireSeller(request: NextRequest) {
-  const session = await requireAuth(request)
+  const user = await requireAuth(request)
 
-  if (session instanceof NextResponse) {
-    return session
+  if (user instanceof NextResponse) {
+    return user
   }
 
-  if (session.role !== UserRole.SELLER &&
-      session.role !== UserRole.ADMIN &&
-      session.role !== UserRole.SUPER_ADMIN) {
+  if (user.role !== 'SELLER' &&
+    user.role !== 'ADMIN' &&
+    user.role !== 'SUPER_ADMIN') {
     return NextResponse.json(
       { error: '판매자 권한이 필요합니다' },
       { status: 403 }
     )
   }
 
-  return session
+  return user
 }

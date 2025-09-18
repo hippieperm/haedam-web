@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { createClient } from '@/lib/supabase/server'
 import { signupSchema } from '@/lib/validations/auth'
-import { hashPassword, setSession } from '@/lib/auth'
-import { UserRole } from '@prisma/client'
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,55 +9,52 @@ export async function POST(request: NextRequest) {
     // Validate input
     const validatedData = signupSchema.parse(body)
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: validatedData.email },
+    const supabase = createClient()
+
+    // Sign up with Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+      email: validatedData.email,
+      password: validatedData.password,
+      options: {
+        data: {
+          name: validatedData.name,
+          nickname: validatedData.nickname,
+          phone: validatedData.phone,
+        }
+      }
     })
 
-    if (existingUser) {
+    if (error) {
+      if (error.message.includes('already registered')) {
+        return NextResponse.json(
+          { error: '이미 등록된 이메일입니다' },
+          { status: 400 }
+        )
+      }
       return NextResponse.json(
-        { error: '이미 등록된 이메일입니다' },
+        { error: error.message },
         { status: 400 }
       )
     }
 
-    // Hash password
-    const passwordHash = await hashPassword(validatedData.password)
+    if (!data.user) {
+      return NextResponse.json(
+        { error: '회원가입에 실패했습니다' },
+        { status: 500 }
+      )
+    }
 
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        email: validatedData.email,
-        passwordHash,
-        name: validatedData.name,
-        nickname: validatedData.nickname,
-        phone: validatedData.phone,
-        role: UserRole.USER,
-      },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        name: true,
-        nickname: true,
-      },
-    })
-
-    // Create session
-    await setSession({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    })
-
+    // The user profile will be automatically created by the trigger function
+    // Return the user data
     return NextResponse.json({
       user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        nickname: user.nickname,
-        role: user.role,
+        id: data.user.id,
+        email: data.user.email,
+        name: validatedData.name,
+        nickname: validatedData.nickname,
+        role: 'USER',
       },
+      message: '회원가입이 완료되었습니다. 이메일을 확인해주세요.'
     })
   } catch (error) {
     if (error instanceof Error) {

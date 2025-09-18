@@ -1,49 +1,52 @@
-import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || "ap-northeast-2",
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
+import { createClient } from '@/lib/supabase/server'
 
 export class StorageService {
-  private static bucketName =
-    process.env.AWS_S3_BUCKET || "bonsai-auction-images";
+  private static getBucketName(folder: "items" | "profiles" | "temp" = "items") {
+    switch (folder) {
+      case "items":
+        return "item-media";
+      case "profiles":
+        return "profile-images";
+      case "temp":
+        return "temp-uploads";
+      default:
+        return "item-media";
+    }
+  }
 
   // 이미지 업로드
   static async uploadImage(
-    file: Buffer,
+    file: Buffer | File,
     fileName: string,
     contentType: string,
     folder: "items" | "profiles" | "temp" = "items"
   ): Promise<{ url: string; key: string }> {
+    const supabase = createClient();
+    const bucketName = this.getBucketName(folder);
     const key = `${folder}/${Date.now()}-${fileName}`;
 
-    const command = new PutObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-      Body: file,
-      ContentType: contentType,
-      ACL: "public-read",
-    });
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .upload(key, file, {
+        contentType,
+        cacheControl: '3600',
+        upsert: false
+      });
 
-    await s3Client.send(command);
+    if (error) {
+      throw new Error(`Upload failed: ${error.message}`);
+    }
 
-    const url = `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    const { data: urlData } = supabase.storage
+      .from(bucketName)
+      .getPublicUrl(key);
 
-    return { url, key };
+    return { url: urlData.publicUrl, key };
   }
 
   // 다중 이미지 업로드
   static async uploadMultipleImages(
-    files: Array<{ buffer: Buffer; fileName: string; contentType: string }>,
+    files: Array<{ buffer: Buffer | File; fileName: string; contentType: string }>,
     folder: "items" | "profiles" | "temp" = "items"
   ): Promise<Array<{ url: string; key: string }>> {
     const uploadPromises = files.map((file) =>
@@ -54,19 +57,31 @@ export class StorageService {
   }
 
   // 이미지 삭제
-  static async deleteImage(key: string): Promise<void> {
-    const command = new DeleteObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-    });
+  static async deleteImage(key: string, folder: "items" | "profiles" | "temp" = "items"): Promise<void> {
+    const supabase = createClient();
+    const bucketName = this.getBucketName(folder);
 
-    await s3Client.send(command);
+    const { error } = await supabase.storage
+      .from(bucketName)
+      .remove([key]);
+
+    if (error) {
+      throw new Error(`Delete failed: ${error.message}`);
+    }
   }
 
   // 다중 이미지 삭제
-  static async deleteMultipleImages(keys: string[]): Promise<void> {
-    const deletePromises = keys.map((key) => this.deleteImage(key));
-    await Promise.all(deletePromises);
+  static async deleteMultipleImages(keys: string[], folder: "items" | "profiles" | "temp" = "items"): Promise<void> {
+    const supabase = createClient();
+    const bucketName = this.getBucketName(folder);
+
+    const { error } = await supabase.storage
+      .from(bucketName)
+      .remove(keys);
+
+    if (error) {
+      throw new Error(`Delete failed: ${error.message}`);
+    }
   }
 
   // 프리사인드 URL 생성 (직접 업로드용)
@@ -75,34 +90,58 @@ export class StorageService {
     contentType: string,
     folder: "items" | "profiles" | "temp" = "items"
   ): Promise<{ uploadUrl: string; fileUrl: string; key: string }> {
+    const supabase = createClient();
+    const bucketName = this.getBucketName(folder);
     const key = `${folder}/${Date.now()}-${fileName}`;
 
-    const command = new PutObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-      ContentType: contentType,
-      ACL: "public-read",
-    });
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .createSignedUploadUrl(key, {
+        expiresIn: 3600,
+        contentType
+      });
 
-    const uploadUrl = await getSignedUrl(s3Client, command, {
-      expiresIn: 3600,
-    });
-    const fileUrl = `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    if (error) {
+      throw new Error(`Presigned URL generation failed: ${error.message}`);
+    }
 
-    return { uploadUrl, fileUrl, key };
+    const { data: urlData } = supabase.storage
+      .from(bucketName)
+      .getPublicUrl(key);
+
+    return {
+      uploadUrl: data.signedUrl,
+      fileUrl: urlData.publicUrl,
+      key
+    };
   }
 
-  // 이미지 리사이징 (Lambda 함수와 연동)
+  // 이미지 리사이징 (Supabase Transform 사용)
   static generateResizedUrls(
     originalKey: string,
-    sizes: number[] = [300, 600, 1200]
+    sizes: number[] = [300, 600, 1200],
+    folder: "items" | "profiles" | "temp" = "items"
   ) {
-    const baseUrl = `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com`;
+    const supabase = createClient();
+    const bucketName = this.getBucketName(folder);
 
-    return sizes.map((size) => ({
-      size,
-      url: `${baseUrl}/resized/${size}/${originalKey}`,
-    }));
+    return sizes.map((size) => {
+      const { data } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(originalKey, {
+          transform: {
+            width: size,
+            height: size,
+            resize: 'cover',
+            quality: 80
+          }
+        });
+
+      return {
+        size,
+        url: data.publicUrl,
+      };
+    });
   }
 
   // 이미지 최적화 URL 생성
@@ -110,17 +149,44 @@ export class StorageService {
     key: string,
     width?: number,
     height?: number,
-    quality = 80
+    quality = 80,
+    folder: "items" | "profiles" | "temp" = "items"
   ) {
-    const baseUrl = `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com`;
+    const supabase = createClient();
+    const bucketName = this.getBucketName(folder);
 
-    if (width || height) {
-      return `${baseUrl}/optimized/${width || "auto"}x${
-        height || "auto"
-      }/q${quality}/${key}`;
+    const { data } = supabase.storage
+      .from(bucketName)
+      .getPublicUrl(key, {
+        transform: {
+          width: width || undefined,
+          height: height || undefined,
+          resize: 'cover',
+          quality
+        }
+      });
+
+    return data.publicUrl;
+  }
+
+  // 파일 다운로드 URL 생성 (제한된 시간)
+  static async generateDownloadUrl(
+    key: string,
+    expiresIn = 3600,
+    folder: "items" | "profiles" | "temp" = "items"
+  ): Promise<string> {
+    const supabase = createClient();
+    const bucketName = this.getBucketName(folder);
+
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .createSignedUrl(key, expiresIn);
+
+    if (error) {
+      throw new Error(`Download URL generation failed: ${error.message}`);
     }
 
-    return `${baseUrl}/${key}`;
+    return data.signedUrl;
   }
 }
 

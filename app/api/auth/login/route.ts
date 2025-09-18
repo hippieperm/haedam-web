@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { createClient } from '@/lib/supabase/server'
 import { loginSchema } from '@/lib/validations/auth'
-import { verifyPassword, setSession } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,67 +9,50 @@ export async function POST(request: NextRequest) {
     // Validate input
     const validatedData = loginSchema.parse(body)
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email: validatedData.email },
-      select: {
-        id: true,
-        email: true,
-        passwordHash: true,
-        role: true,
-        name: true,
-        nickname: true,
-        isVerified: true,
-      },
+    const supabase = createClient()
+
+    // Sign in with Supabase Auth
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: validatedData.email,
+      password: validatedData.password,
     })
 
-    if (!user) {
+    if (error) {
       return NextResponse.json(
         { error: '이메일 또는 비밀번호가 일치하지 않습니다' },
         { status: 401 }
       )
     }
 
-    // Verify password
-    const isValidPassword = await verifyPassword(validatedData.password, user.passwordHash)
-
-    if (!isValidPassword) {
+    if (!data.user) {
       return NextResponse.json(
-        { error: '이메일 또는 비밀번호가 일치하지 않습니다' },
+        { error: '로그인에 실패했습니다' },
         { status: 401 }
       )
     }
 
-    // Check if admin login
-    const adminUsername = process.env.ADMIN_USERNAME
-    const adminPassword = process.env.ADMIN_PASSWORD
+    // Get user profile
+    const { data: profile, error: profileError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', data.user.id)
+      .single()
 
-    if (validatedData.email === 'admin@bonsai-auction.com' &&
-        adminUsername && adminPassword &&
-        validatedData.password === adminPassword) {
-      // Admin login with environment credentials
-      await setSession({
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-      })
-    } else {
-      // Regular user login
-      await setSession({
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-      })
+    if (profileError || !profile) {
+      return NextResponse.json(
+        { error: '사용자 정보를 가져올 수 없습니다' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
       user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        nickname: user.nickname,
-        role: user.role,
-        isVerified: user.isVerified,
+        id: profile.id,
+        email: profile.email,
+        name: profile.name,
+        nickname: profile.nickname,
+        role: profile.role,
+        is_verified: profile.is_verified,
       },
     })
   } catch (error) {

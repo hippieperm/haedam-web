@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { ItemStatus } from "@prisma/client";
+import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get("status") as ItemStatus | null;
+    const status = searchParams.get("status") || "LIVE";
     const species = searchParams.get("species");
     const minPrice = searchParams.get("minPrice");
     const maxPrice = searchParams.get("maxPrice");
@@ -14,87 +13,80 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get("sort") || "newest";
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
-    const skip = (page - 1) * limit;
+    const offset = (page - 1) * limit;
 
-    // Build where clause
-    const where: any = {
-      status: status || ItemStatus.LIVE,
-      deletedAt: null,
-    };
+    const supabase = createClient();
 
+    // Build query
+    let query = supabase
+      .from('items')
+      .select(`
+        *,
+        seller:users(id, name, nickname),
+        media:item_media(*),
+        bids(*),
+        watchlists(*)
+      `)
+      .eq('status', status)
+      .is('deleted_at', null);
+
+    // Apply filters
     if (species) {
-      where.species = { contains: species, mode: "insensitive" };
+      query = query.ilike('species', `%${species}%`);
     }
 
-    if (minPrice || maxPrice) {
-      where.currentPrice = {};
-      if (minPrice) where.currentPrice.gte = parseFloat(minPrice);
-      if (maxPrice) where.currentPrice.lte = parseFloat(maxPrice);
+    if (minPrice) {
+      query = query.gte('current_price', parseFloat(minPrice));
+    }
+
+    if (maxPrice) {
+      query = query.lte('current_price', parseFloat(maxPrice));
     }
 
     if (search) {
-      where.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-        { species: { contains: search, mode: "insensitive" } },
-      ];
+      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%,species.ilike.%${search}%`);
     }
 
-    // Build order by
-    let orderBy: any = { createdAt: "desc" };
+    // Apply sorting
     switch (sort) {
       case "price_asc":
-        orderBy = { currentPrice: "asc" };
+        query = query.order('current_price', { ascending: true });
         break;
       case "price_desc":
-        orderBy = { currentPrice: "desc" };
+        query = query.order('current_price', { ascending: false });
         break;
       case "ending_soon":
-        orderBy = { endsAt: "asc" };
+        query = query.order('ends_at', { ascending: true });
         break;
       case "most_watched":
-        orderBy = { watchlists: { _count: "desc" } };
+        query = query.order('view_count', { ascending: false });
         break;
       case "most_bids":
-        orderBy = { bids: { _count: "desc" } };
+        // This would need a custom query with joins
+        query = query.order('created_at', { ascending: false });
         break;
+      default:
+        query = query.order('created_at', { ascending: false });
     }
 
-    const items = await prisma.item.findMany({
-      where,
-      include: {
-        seller: {
-          select: { id: true, name: true, nickname: true },
-        },
-        media: {
-          orderBy: { sort: "asc" },
-          take: 1,
-        },
-        _count: {
-          select: { bids: true, watchlists: true },
-        },
-        bids: {
-          orderBy: { amount: "desc" },
-          take: 1,
-          select: { amount: true, createdAt: true },
-        },
-      },
-      orderBy,
-      skip,
-      take: limit,
-    });
+    // Apply pagination
+    query = query.range(offset, offset + limit - 1);
 
-    const total = await prisma.item.count({ where });
+    const { data: items, error, count } = await query;
+
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json({
       success: true,
       data: {
-        items,
+        items: items || [],
         pagination: {
           page,
           limit,
-          total,
-          totalPages: Math.ceil(total / limit),
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limit),
         },
       },
     });
@@ -120,55 +112,63 @@ export async function POST(request: NextRequest) {
     // FormData 처리
     const formData = await request.formData();
 
+    const supabase = createClient();
+
     // 기본 상품 정보
     const itemData = {
-      sellerId: user.id,
+      seller_id: user.id,
       title: formData.get("title") as string,
       description: (formData.get("description") as string) || null,
       species: formData.get("species") as string,
       style: (formData.get("style") as string) || null,
-      sizeClass: (formData.get("sizeClass") as string) || null,
-      heightCm: formData.get("heightCm")
+      size_class: (formData.get("sizeClass") as string) || null,
+      height_cm: formData.get("heightCm")
         ? parseFloat(formData.get("heightCm") as string)
         : null,
-      crownWidthCm: formData.get("crownWidthCm")
+      crown_width_cm: formData.get("crownWidthCm")
         ? parseFloat(formData.get("crownWidthCm") as string)
         : null,
-      trunkDiameterCm: formData.get("trunkDiameterCm")
+      trunk_diameter_cm: formData.get("trunkDiameterCm")
         ? parseFloat(formData.get("trunkDiameterCm") as string)
         : null,
-      ageYearsEst: formData.get("ageYearsEst")
+      age_years_est: formData.get("ageYearsEst")
         ? parseInt(formData.get("ageYearsEst") as string)
         : null,
-      healthNotes: (formData.get("healthNotes") as string) || null,
-      originNotes: (formData.get("originNotes") as string) || null,
-      careHistory: (formData.get("careHistory") as string) || null,
-      status: ItemStatus.PENDING_REVIEW,
-      startPrice: parseFloat(formData.get("startPrice") as string),
-      currentPrice: parseFloat(formData.get("startPrice") as string),
-      buyNowPrice: formData.get("buyNowPrice")
+      health_notes: (formData.get("healthNotes") as string) || null,
+      origin_notes: (formData.get("originNotes") as string) || null,
+      care_history: (formData.get("careHistory") as string) || null,
+      status: "PENDING_REVIEW",
+      start_price: parseFloat(formData.get("startPrice") as string),
+      current_price: parseFloat(formData.get("startPrice") as string),
+      buy_now_price: formData.get("buyNowPrice")
         ? parseFloat(formData.get("buyNowPrice") as string)
         : null,
-      reservePrice: formData.get("reservePrice")
+      reserve_price: formData.get("reservePrice")
         ? parseFloat(formData.get("reservePrice") as string)
         : null,
-      bidStep: parseFloat(formData.get("bidStep") as string),
-      startsAt: new Date(formData.get("startsAt") as string),
-      endsAt: new Date(formData.get("endsAt") as string),
-      autoExtendMinutes: formData.get("autoExtendMinutes")
+      bid_step: parseFloat(formData.get("bidStep") as string),
+      starts_at: new Date(formData.get("startsAt") as string).toISOString(),
+      ends_at: new Date(formData.get("endsAt") as string).toISOString(),
+      auto_extend_minutes: formData.get("autoExtendMinutes")
         ? parseInt(formData.get("autoExtendMinutes") as string)
         : null,
-      shippingMethod: formData.get("shippingMethod") as string,
-      shippingFeePolicy: (formData.get("shippingFeePolicy") as string) || null,
-      packagingNotes: (formData.get("packagingNotes") as string) || null,
+      shipping_method: formData.get("shippingMethod") as string,
+      shipping_fee_policy: (formData.get("shippingFeePolicy") as string) || null,
+      packaging_notes: (formData.get("packagingNotes") as string) || null,
     };
 
     // 상품 생성
-    const item = await prisma.item.create({
-      data: itemData,
-    });
+    const { data: item, error: itemError } = await supabase
+      .from('items')
+      .insert(itemData)
+      .select()
+      .single();
 
-    // 미디어 파일 처리 (실제로는 파일 업로드 서비스에 업로드해야 함)
+    if (itemError) {
+      throw itemError;
+    }
+
+    // 미디어 파일 처리 (Supabase Storage 사용)
     const mediaFiles = [];
     let mediaIndex = 0;
 
@@ -177,15 +177,28 @@ export async function POST(request: NextRequest) {
       const mediaType = formData.get(`media_type_${mediaIndex}`) as string;
 
       if (file) {
-        // 실제 환경에서는 파일을 클라우드 스토리지에 업로드하고 URL을 받아야 함
-        // 여기서는 임시로 placeholder URL 사용
-        const mediaUrl = `https://via.placeholder.com/800x600?text=${encodeURIComponent(
-          file.name
-        )}`;
+        // Supabase Storage에 파일 업로드
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${item.id}_${mediaIndex}.${fileExt}`;
+        const filePath = `items/${item.id}/${fileName}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('item-media')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          continue;
+        }
+
+        // Public URL 생성
+        const { data: urlData } = supabase.storage
+          .from('item-media')
+          .getPublicUrl(filePath);
 
         mediaFiles.push({
-          itemId: item.id,
-          url: mediaUrl,
+          item_id: item.id,
+          url: urlData.publicUrl,
           type: mediaType,
           sort: mediaIndex,
         });
@@ -196,9 +209,13 @@ export async function POST(request: NextRequest) {
 
     // 미디어 파일 저장
     if (mediaFiles.length > 0) {
-      await prisma.itemMedia.createMany({
-        data: mediaFiles,
-      });
+      const { error: mediaError } = await supabase
+        .from('item_media')
+        .insert(mediaFiles);
+
+      if (mediaError) {
+        console.error('Media save error:', mediaError);
+      }
     }
 
     return NextResponse.json({
