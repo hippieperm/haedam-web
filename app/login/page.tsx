@@ -37,7 +37,7 @@ export default function LoginPage() {
         router.push("/");
         router.refresh();
       } else {
-        setError(data.message || "로그인에 실패했습니다.");
+        setError(data.error || data.message || "로그인에 실패했습니다.");
       }
     } catch (error) {
       console.error("Login error:", error);

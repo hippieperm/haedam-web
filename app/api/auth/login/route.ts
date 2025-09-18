@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
+      success: true,
       user: {
         id: profile.id,
         email: profile.email,

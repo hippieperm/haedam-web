@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
         )
       }
       return NextResponse.json(
-        { error: error.message },
+        { error: '이메일 주소가 유효하지 않습니다. 실제 이메일 주소를 사용해주세요.' },
         { status: 400 }
       )
     }
