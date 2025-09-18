@@ -28,37 +28,13 @@ interface MediaFile {
 
 export default function SellPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
-
-  // 인증 확인
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-    }
-  }, [user, authLoading, router]);
-
-  // 로딩 중이거나 사용자가 없으면 로딩 화면 표시
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">로딩 중...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null; // 리다이렉트 중
-  }
-
   const [formData, setFormData] = useState({
     // 기본 정보
     title: "",
@@ -88,6 +64,37 @@ export default function SellPage() {
     shippingFeePolicy: "",
     packagingNotes: "",
   });
+
+  // 사용자가 없으면 로그인 페이지로 리다이렉트
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
+
+  // 로딩 중이면 로딩 화면 표시
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 사용자가 없으면 로딩 화면 표시 (리다이렉트 중)
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">로그인 페이지로 이동 중...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -333,8 +340,8 @@ export default function SellPage() {
               <div key={step} className="flex items-center">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep >= step
-                      ? "bg-green-600 text-white"
-                      : "bg-gray-200 text-black"
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-200 text-black"
                     }`}
                 >
                   {step}
@@ -670,8 +677,8 @@ export default function SellPage() {
 
               <div
                 className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${isDragOver
-                    ? "border-green-400 bg-green-50"
-                    : "border-gray-300 hover:border-gray-400"
+                  ? "border-green-400 bg-green-50"
+                  : "border-gray-300 hover:border-gray-400"
                   }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
