@@ -184,7 +184,7 @@ export default function SellPage() {
         return hasRequiredFields && isValidTimeRange && priceValidation.isValid;
       case 3: // 배송 정보
         return !!(formData.shippingMethod);
-      case 4: // 미디어 (선택사항)
+      case 4: // 미디어 (필수)
         return mediaFiles.length >= 1; // 최소 1장 이상의 이미지 필요
       default:
         return false;
