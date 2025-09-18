@@ -248,6 +248,23 @@ export default function SellPage() {
     }));
   };
 
+  // 빠른 가격 설정 핸들러 (현재 가격에 추가)
+  const handleQuickPrice = (fieldName: string, amount: number) => {
+    setFormData((prev) => {
+      const currentValue = prev[fieldName as keyof typeof prev] as string;
+      // 현재 가격에서 숫자만 추출 (쉼표 제거)
+      const currentAmount = currentValue ? parsePriceInput(currentValue) : 0;
+      // 새로운 금액은 현재 금액 + 버튼 금액
+      const newAmount = currentAmount + amount;
+      const formattedValue = formatPriceInput(newAmount.toString());
+      
+      return {
+        ...prev,
+        [fieldName]: formattedValue,
+      };
+    });
+  };
+
   // 전화번호 입력 핸들러
   const handlePhoneInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -704,6 +721,18 @@ export default function SellPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                     placeholder="100,000"
                   />
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {[10000, 50000, 100000, 500000, 1000000].map((amount) => (
+                      <button
+                        key={amount}
+                        type="button"
+                        onClick={() => handleQuickPrice('startPrice', amount)}
+                        className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors"
+                      >
+                        {amount.toLocaleString()}원
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div>
@@ -720,6 +749,18 @@ export default function SellPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                     placeholder="10,000"
                   />
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {[1000, 5000, 10000, 50000, 100000].map((amount) => (
+                      <button
+                        key={amount}
+                        type="button"
+                        onClick={() => handleQuickPrice('bidStep', amount)}
+                        className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors"
+                      >
+                        {amount.toLocaleString()}원
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -736,6 +777,18 @@ export default function SellPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                     placeholder="500,000"
                   />
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {[100000, 500000, 1000000, 2000000, 5000000].map((amount) => (
+                      <button
+                        key={amount}
+                        type="button"
+                        onClick={() => handleQuickPrice('buyNowPrice', amount)}
+                        className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors"
+                      >
+                        {amount.toLocaleString()}원
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div>
@@ -750,6 +803,18 @@ export default function SellPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder:text-gray-500 text-black"
                     placeholder="200,000"
                   />
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {[10000, 50000, 100000, 200000, 500000, 1000000].map((amount) => (
+                      <button
+                        key={amount}
+                        type="button"
+                        onClick={() => handleQuickPrice('reservePrice', amount)}
+                        className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors"
+                      >
+                        {amount.toLocaleString()}원
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
